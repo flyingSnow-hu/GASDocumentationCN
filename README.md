@@ -794,38 +794,38 @@ void UGSAttributeSetBase::OnAttributeAggregatorCreated(const FGameplayAttribute&
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge"></a>
-### 4.5 Gameplay Effects
+### 4.5 游戏效果 / GameplayEffect / GE
 
 <a name="concepts-ge-definition"></a>
-#### 4.5.1 Gameplay Effect Definition
-[`GameplayEffects`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffect/index.html) (`GE`) are the vessels through which abilities change [`Attributes`](#concepts-a) and [`GameplayTags`](#concepts-gt) on themselves and others. They can cause immediate `Attribute` changes like damage or healing or apply long term status buff/debuffs like a movespeed boost or stunning. The `UGameplayEffect` class is a meant to be a **data-only** class that defines a single gameplay effect. No additional logic should be added to `GameplayEffects`. Typically designers will create many Blueprint child classes of `UGameplayEffect`.
+#### 4.5.1 游戏效果的定义
+[`游戏效果`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffect/index.html) (`GE`) 是技能改变自身和他人[`属性`](#concepts-a)和[`游戏标签`](#concepts-gt)的媒介。 它们可以立即改变`属性`（如伤害或治疗），也可以应用长期的状态缓冲/减弱（如移动速度提升或眩晕）`UGameplayEffect` 类是一个**纯数据**类，用于定义单一的游戏效果。不应在 `GameplayEffect` 中添加任何附加逻辑。通常情况下，设计者会创建许多 `UGameplayEffect` 的蓝图子类。
 
-`GameplayEffects` change `Attributes` through [`Modifiers`](#concepts-ge-mods) and [`Executions` (`GameplayEffectExecutionCalculation`)](#concepts-ge-ec).
+`游戏效果` 通过 [`修饰器/Modifier`](#concepts-ge-mods) 和 [`Executions` (`GameplayEffectExecutionCalculation`)](#concepts-ge-ec) 修改 `属性` .
 
-`GameplayEffects` have three types of duration: `Instant`, `Duration`, and `Infinite`.
+`游戏效果` 有三种持续时间："Instant"（即时）、"Duration"（持续）和 "Infinite"（无限）。
 
-Additionally, `GameplayEffects` can add/execute [`GameplayCues`](#concepts-gc). An `Instant` `GameplayEffect` will call `Execute` on the `GameplayCue` `GameplayTags` whereas a `Duration` or `Infinite` `GameplayEffect` will call `Add` and `Remove` on the `GameplayCue` `GameplayTags`.
+此外，`游戏效果` 还可以添加/执行 [`游戏信号/GameplayCue`](#concepts-gc)。`即时 游戏效果` 会调用 游戏信号和游戏标签 上的 `Execute`，而持续时间或无限 游戏效果 则会调用 游戏信号和游戏标签 上的 `Add` 和 `Remove`。
 
-| Duration Type | GameplayCue Event | When to use                                                                                                                                                                                                                                |
+| 持续类型 | 提示事件 | 何时使用                                                                                                                                                                                                                                |
 | ------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Instant`     | Execute           | For immediate permanent changes to `Attribute's` `BaseValue`. `GameplayTags` will not be applied, not even for a frame.                                                                                                                    |
-| `Duration`    | Add & Remove      | For temporary changes to `Attribute's` `CurrentValue` and to apply `GameplayTags` that will be removed when the `GameplayEffect` expires or is manually removed. The duration is specified in the `UGameplayEffect` class/Blueprint.       |
-| `Infinite`    | Add & Remove      | For temporary changes to `Attribute's` `CurrentValue` and to apply `GameplayTags` that will be removed when the `GameplayEffect` is removed. These will never expire on their own and must be manually removed by an ability or the `ASC`. |
+| `即时`     | Execute           | 立即永久更改属性的 BaseValue。不会应用 GameplayTags，甚至不会应用一帧。                                                                                                                    |
+| `持续`    | Add & Remove      | 用于临时更改`属性`的`当前值`和应用`游戏标签`，这些标签将在`游戏效果`过期或手动移除时一同移除。持续时间在 UGameplayEffect 类/蓝图中指定。       |
+| `无限`    | Add & Remove      | 用于临时更改`属性`的`当前值`和应用`游戏标签`，这些标签会在`游戏效果`移除时一同移除。这种`标签`永远不会自行失效，必须由技能或 `ASC` 手动移除。 |
 
-`Duration` and `Infinite` `GameplayEffects` have the option of applying `Periodic Effects` that apply its `Modifiers` and `Executions` every `X` seconds as defined by its `Period`. `Periodic Effects` are treated as `Instant` `GameplayEffects` when it comes to changing the `Attribute's` `BaseValue` and `Executing` `GameplayCues`. These are useful for damage over time (DOT) type effects. **Note:** `Periodic Effects` cannot be [predicted](#concepts-p).
+`持续`和`无限``游戏效果`可以选择应用`周期性效果`（Periodic Effects），根据周期的定义，每 X 秒应用一次`修改器`和`执行器`。在更改属性的`基础值`和执行`游戏信号`时，周期效果被视为即时游戏效果。这对于随时间变化的伤害 (DOT) 类型效果非常有用。**注意：**周期效果无法[预测](#concepts-p)。
 
-`Duration` and `Infinite` `GameplayEffects` can be temporarily turned off and on after application if their `Ongoing Tag Requirements` are not met/met ([Gameplay Effect Tags](#concepts-ge-tags)). Turning off a `GameplayEffect` removes the effects of its `Modifiers` and applied `GameplayTags` but does not remove the `GameplayEffect`. Turning the `GameplayEffect` back on reapplies its `Modifiers` and `GameplayTags`.
+如果`持续`和`无限`类型`游戏效果`满足或不满足其`持续标签`要求（[游戏效果标签](#concepts-ge-tags)），则可以在应用后暂时开启或关闭。关闭`游戏效果`会移除其`修改器`和应用的`游戏标签`的效果，但不会移除`游戏效果`。重新打开`游戏效果`会重新应用其`修改器`和 `游戏标签`。
 
-If you need to manually recalculate the `Modifiers` of a `Duration` or `Infinite` `GameplayEffect` (say you have an `MMC` that uses data that doesn't come from `Attributes`), you can call `UAbilitySystemComponent::ActiveGameplayEffects.SetActiveGameplayEffectLevel(FActiveGameplayEffectHandle ActiveHandle, int32 NewLevel)` with the same level that it already has using `UAbilitySystemComponent::ActiveGameplayEffects.GetActiveGameplayEffect(ActiveHandle).Spec.GetLevel()`. `Modifiers` that are based on backing `Attributes` automatically update when those backing `Attributes` update. The key functions of `SetActiveGameplayEffectLevel()` to update the `Modifiers` are:
+如果您需要手动刷新`持续`或`无限`游戏效果的修改器（例如您有一个使用非`属性`数据的 MMC），您可以调用`UAbilitySystemComponent::ActiveGameplayEffects.SetActiveGameplayEffectLevel(FActiveGameplayEffectHandle ActiveHandle, int32 NewLevel)` ，其中 level 参数从 `UAbilitySystemComponent::ActiveGameplayEffects.GetActiveGameplayEffect(ActiveHandle).Spec.GetLevel()` 获取。当支持`属性`更新时，基于支持`属性`的`修改器`也会自动更新。`SetActiveGameplayEffectLevel()` 更新修改器的关键函数是
 
 ```C++
 MarkItemDirty(Effect);
 Effect.Spec.CalculateModifierMagnitudes();
-// Private function otherwise we'd call these three functions without needing to set the level to what it already is
+//这里是 Private 函数，否则我们将直接调用这三个函数，而无需将 level 设置为原来的值
 UpdateAllAggregatorModMagnitudes(Effect);
 ```
 
-`GameplayEffects` are not typically instantiated. When an ability or `ASC` wants to apply a `GameplayEffect`, it creates a [`GameplayEffectSpec`](#concepts-ge-spec) from the `GameplayEffect's` `ClassDefaultObject`. Successfully applied `GameplayEffectSpecs` are then added to a new struct called `FActiveGameplayEffect` which is what the `ASC` keeps track of in a special container struct called `ActiveGameplayEffects`.
+`游戏效果`通常不会被实例化。当一个技能或 `ASC` 想要应用一个`游戏效果`时，它会从 `游戏效果`的 ClassDefaultObject 中创建一个 [`游戏效果实例 / GameplayEffectSpec`](#concepts-ge-spec)。应用成功的 `GameplayEffectSpec` 会被添加到一个名为 `FActiveGameplayEffect` 的新结构中，`ASC` 会在一个名为 `ActiveGameplayEffects` 的特殊容器结构中跟踪该结构。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
