@@ -1,4 +1,4 @@
-﻿# GASDocumentation
+# GASDocumentation
 这里写的是我对虚幻引擎 5 的 GameplayAbilitySystem 插件 (GAS) 的理解，以及一个简单的多人示例项目。这不是官方文档，本项目和我本人都与 Epic Games 无关。我不保证这些信息的准确性。
 本文档的目的是解释 GAS 中的主要概念和类，并根据我的使用经验提供一些补充说明。社区中的用户对 GAS 有很多 "部落知识"，我希望在此分享我的所有知识。
 示例项目和文档目前使用的是**虚幻引擎 5.2**。本文档有针对虚幻引擎旧版本的分支，但它们不再受支持，并且可能存在错误或信息过时。
@@ -202,7 +202,7 @@ GameplayAbilitySystem插件由Epic游戏公司开发，和虚幻引擎5（UE5）
 
 <a name="sp"></a>
 ## 2. 示例项目
-本文档中包含一个多人第三人称射击游戏示例项目，面向熟悉 UE 5 但不熟悉 GameplayAbilitySystem 插件的用户。我们假设用户已了解 C++、蓝图、UMG、复制等 UE5 中的其他中级主题。该项目提供了一个示例，说明如何设置基本的第三人称射击多人游戏项目就绪，其中玩家/AI 控制的`PlayerState`类上有`AbilitySystemComponent`( ASC) ， AI 控制的小兵的 `Character`` 类上也有`ASC`。
+本文档中包含一个多人第三人称射击游戏示例项目，面向熟悉 UE 5 但不熟悉 GameplayAbilitySystem 插件的用户。我们假设用户已了解 C++、蓝图、UMG、复制等 UE5 中的其他中级主题。该项目提供了一个示例，说明如何设置基本的第三人称射击多人游戏项目就绪，其中玩家/AI 控制的`PlayerState`类上有`AbilitySystemComponent`( ASC) ， AI 控制的小兵的 `Character` 类上也有`ASC`。
 我们的目标是保持项目简单，同时展示 GAS 基础知识并通过注释良好的代码展示一些常见的功能。由于其专注于初学者，该项目不展示[飞弹预测](#concepts-p-spawn)等高级主题。
 
 涉及到的概念：
@@ -830,79 +830,90 @@ UpdateAllAggregatorModMagnitudes(Effect);
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-applying"></a>
-#### 4.5.2 Applying Gameplay Effects
-`GameplayEffects` can be applied in many ways from functions on [`GameplayAbilities`](#concepts-ga) and functions on the `ASC` and usually take the form of `ApplyGameplayEffectTo`. The different functions are essentially convenience functions that will eventually call `UAbilitySystemComponent::ApplyGameplayEffectSpecToSelf()` on the `Target`.
+#### 4.5.2 应用游戏效果
+`游戏效果`可以通过多种方式应用，包括 [`游戏技能`](#concepts-ga) 上的函数和 `ASC` 上的函数，通常采用 `ApplyGameplayEffectTo` 的形式。不同的函数本质上都是便利函数，最终都会调用目标上的 `UAbilitySystemComponent::ApplyGameplayEffectSpecToSelf()` 。
 
-To apply `GameplayEffects` outside of a `GameplayAbility` for example from a projectile, you need to get the `Target's` `ASC` and use one of its functions to `ApplyGameplayEffectToSelf`.
+要在 `游戏技能` 之外应用 `游戏效果`（例如来自子弹的效果），您需要获取目标的 ASC 并使用其中一个函数 `ApplyGameplayEffectToSelf`。
 
-You can listen for when any `Duration` or `Infinite` `GameplayEffects` are applied to an `ASC` by binding to its delegate:
+当任何`持续`或`无限`类型`游戏效果`应用到 `ASC` 时，会触发事件，您可以绑定到其委托以监听：
+
 ```c++
 AbilitySystemComponent->OnActiveGameplayEffectAddedDelegateToSelf.AddUObject(this, &APACharacterBase::OnActiveGameplayEffectAddedCallback);
 ```
-The callback function:
+回调函数：
 ```c++
 virtual void OnActiveGameplayEffectAddedCallback(UAbilitySystemComponent* Target, const FGameplayEffectSpec& SpecApplied, FActiveGameplayEffectHandle ActiveHandle);
 ```
 
-The server will always call this function regardless of replication mode. The autonomous proxy will only call this for replicated `GameplayEffects` in `Full` and `Mixed` replication modes. Simulated proxies will only call this in `Full` [replication mode](#concepts-asc-rm).
+无论复制模式如何，服务器始终会调用此函数，。自主代理只会为 `Full` 和 `Mixed` 复制模式中的已复制 `游戏效果` 调用此函数。模拟代理只会在此复制模式下在 `Full` [复制模式](#concepts-asc-rm)中调用此函数。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ga-removing"></a>
-#### 4.5.3 Removing Gameplay Effects
-`GameplayEffects` can be removed in many ways from functions on [`GameplayAbilities`](#concepts-ga) and functions on the `ASC` and usually take the form of `RemoveActiveGameplayEffect`. The different functions are essentially convenience functions that will eventually call `FActiveGameplayEffectsContainer::RemoveActiveEffects()` on the `Target`.
+#### 4.5.3 移除游戏效果
+`游戏效果`可以通过多种方式移除，包括 [`游戏技能`](#concepts-ga) 上的函数和 `ASC` 上的函数，通常采用 `RemoveActiveGameplayEffect` 的形式。不同的函数本质上都是便利函数，最终都会调用目标上的 `FActiveGameplayEffectsContainer::RemoveActiveEffects()` 。
 
-To remove `GameplayEffects` outside of a `GameplayAbility`, you need to get the `Target's` `ASC` and use one of its functions to `RemoveActiveGameplayEffect`.
+要在`游戏效果`之外移除 `游戏技能` 例如来自子弹的效果），您需要获取目标的 `ASC` 并使用其中一个函数 `RemoveActiveGameplayEffect`。
 
-You can listen for when any `Duration` or `Infinite` `GameplayEffects` are removed from an `ASC` by binding to its delegate:
+您可以在 `ASC` 上绑定一个委托来监听任何 `持续` 或 `无限` 的 `游戏效果` 被移除：
+
 ```c++
 AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &APACharacterBase::OnRemoveGameplayEffectCallback);
 ```
-The callback function:
+
+回调函数：
 ```c++
 virtual void OnRemoveGameplayEffectCallback(const FActiveGameplayEffect& EffectRemoved);
 ```
 
-The server will always call this function regardless of replication mode. The autonomous proxy will only call this for replicated `GameplayEffects` in `Full` and `Mixed` replication modes. Simulated proxies will only call this in `Full` [replication mode](#concepts-asc-rm).
+无论复制模式如何，服务器始终会调用此函数。自主代理只会为 `Full` 和 `Mixed` 复制模式中的已复制 `游戏效果` 调用此函数。模拟代理只会在 `Full` [复制模式](#concepts-asc-rm)中调用此函数。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-mods"></a>
-#### 4.5.4 Gameplay Effect Modifiers 
-`Modifiers` change an `Attribute` and are the only way to [predictively](#concepts-p) change an `Attribute`. A `GameplayEffect` can have zero or many `Modifiers`. Each `Modifier` is responsible for changing only one `Attribute` via a specified operation.
+#### 4.5.4 游戏效果修改器
+`Modifiers` change an `Attribute` and are the only way to [predictively](#concepts-p) change an `Attribute`. A `GameplayEffect` can have zero or many `Modifiers`. Each `Modifier` is responsible for changing only one `Attribute` via a specified operation.  
+`修改器` 负责修改 `属性` ，并且是唯一能[预测](#concepts-p)`属性`修改的方式。`游戏效果` 可以有零个或多个 `修改器`。每个 `修改器` 负责通过指定的操作仅更改一个 `属性`。  
 
-| Operation  | Description                                                                                                         |
+| Operation/操作  | Description/描述                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------------------------------------------- |
-| `Add`      | Adds the result to the `Modifier's` specified `Attribute`. Use a negative value for subtraction.                    |
-| `Multiply` | Multiplies the result to the `Modifier's` specified `Attribute`.                                                    |
-| `Divide`   | Divides the result against the `Modifier's` specified `Attribute`.                                                  |
-| `Override` | Overrides the `Modifier's` specified `Attribute` with the result.                                                   |
+| `Add`      | Adds the result to the `Modifier's` specified `Attribute`. Use a negative value for subtraction.<br> 将结果与`修改器`指定的`属性`相加。负值代表减法。                    |
+| `Multiply` | Multiplies the result to the `Modifier's` specified `Attribute`. <br> 将结果与`修改器`指定的`属性`相乘。                                                   |
+| `Divide`   | Divides the result against the `Modifier's` specified `Attribute`. <br> 将结果与`修改器`指定的`属性`相除。                                                 |
+| `Override` | Overrides the `Modifier's` specified `Attribute` with the result.<br>用结果覆盖`修改器`指定的`属性`。                                                  |
 
-The `CurrentValue` of an `Attribute` is the aggregate result of all of its `Modifiers` added to its `BaseValue`. The formula for how `Modifiers` are aggregated is defined as follows in `FAggregatorModChannel::EvaluateWithBase` in `GameplayEffectAggregator.cpp`:
+The `CurrentValue` of an `Attribute` is the aggregate result of all of its `Modifiers` added to its `BaseValue`. The formula for how `Modifiers` are aggregated is defined as follows in `FAggregatorModChannel::EvaluateWithBase` in `GameplayEffectAggregator.cpp`:  
+`修改器` 的 `当前值` 是所有 `修改器` 添加到 `基础值` 的总和。`修改器` 聚合的公式定义在 `GameplayEffectAggregator.cpp` 中的 `FAggregatorModChannel::EvaluateWithBase` 中：  
 ```c++
 ((InlineBaseValue + Additive) * Multiplicitive) / Division
 ```
+ 
+Any `Override` `Modifiers` will override the final value with the last applied `Modifier` taking precedence.  
+任何`Override` `修改器`都会覆盖`修改器`的最终值，最终值取决于最后一个`修改器`。 
 
-Any `Override` `Modifiers` will override the final value with the last applied `Modifier` taking precedence.
+**Note:** For percentage based changes, make sure to use the `Multiply` operation so that it happens after addition.  
+**注意：** 对于百分比修改的`修改器`，请使用`Multiply`，以便在添加后起作用。  
 
-**Note:** For percentage based changes, make sure to use the `Multiply` operation so that it happens after addition.
+**Note:** [Prediction](#concepts-p) has trouble with percentage changes.  
+**注意：** [预测](#concepts-p) 难以处理百分比变化。  
 
-**Note:** [Prediction](#concepts-p) has trouble with percentage changes.
+There are four types of `Modifiers`: Scalable Float, Attribute Based, Custom Calculation Class, and Set By Caller. They all generate some float value that is then used to change the specified `Attribute` of the `Modifier` based on its operation.  
+`修改器`有四种类型：可缩放浮点数、基于属性的、自定义计算类和由调用者设置的。它们都生成一些浮点值，然后使用它们的操作来改变`修改器`指定的`属性`。  
 
-There are four types of `Modifiers`: Scalable Float, Attribute Based, Custom Calculation Class, and Set By Caller. They all generate some float value that is then used to change the specified `Attribute` of the `Modifier` based on its operation.
-
-| `Modifier` Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `Modifier` Type/`修改器`类型            | Description/描述                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Scalable Float`           | `FScalableFloats` are a structure that can point to a Data Table that has the variables as rows and levels as columns. The Scalable Floats will automatically read the value of the specified table row at the ability's current level (or different level if overriden on the [`GameplayEffectSpec`](#concepts-ge-spec)). This value can further be manipulated by a coefficient. If no Data Table/Row is specified, it treats the value as a 1 so the coefficient can be used to hard code in a single value at all levels. ![ScalableFloat](https://github.com/tranek/GASDocumentation/raw/master/Images/scalablefloats.png)                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `Attribute Based`          | `Attribute Based` `Modifiers` take the `CurrentValue` or `BaseValue` of a backing `Attribute` on the `Source` (who created the `GameplayEffectSpec`) or `Target` (who received the `GameplayEffectSpec`) and further modifies it with a coefficient and pre and post coefficient additions. `Snapshotting` means the backing `Attribute` is captured when the `GameplayEffectSpec` is created whereas no snapshotting means the `Attribute` is captured when the `GameplayEffectSpec` is applied.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `Custom Calculation Class` | `Custom Calculation Class` provides the most flexibility for complex `Modifiers`. This `Modifier` takes a [`ModifierMagnitudeCalculation`](#concepts-ge-mmc) class and can further manipulate the resulting float value with a coefficient and pre and post coefficient additions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `Set By Caller`            | `SetByCaller` `Modifiers` are values that are set outside of the `GameplayEffect` at runtime by the ability or whoever made the `GameplayEffectSpec` on the `GameplayEffectSpec`. For example, you would use a `SetByCaller` if you want to set the damage to be based on how long the player held down a button to charge the ability. `SetByCallers` are essentially `TMap<FGameplayTag, float>` that live on the `GameplayEffectSpec`. The `Modifier` is just telling the `Aggregator` to look for a `SetByCaller` value associated with the supplied `GameplayTag`. The `SetByCallers` used by `Modifiers` can only use the `GameplayTag` version of the concept. The `FName` version is disabled here. If the `Modifier` is set to `SetByCaller` but a `SetByCaller` with the correct `GameplayTag` does not exist on the `GameplayEffectSpec`, the game will throw a runtime error and return a value of 0. This might cause issues in the case of a `Divide` operation. See [`SetByCallers`](#concepts-ge-spec-setbycaller) for more information on how to use `SetByCallers`. |
+| `Scalable Float`<br>           | `FScalableFloats` are a structure that can point to a Data Table that has the variables as rows and levels as columns. The Scalable Floats will automatically read the value of the specified table row at the ability's current level (or different level if overriden on the [`GameplayEffectSpec`](#concepts-ge-spec)). This value can further be manipulated by a coefficient. If no Data Table/Row is specified, it treats the value as a 1 so the coefficient can be used to hard code in a single value at all levels. ![ScalableFloat](https://github.com/tranek/GASDocumentation/raw/master/Images/scalablefloats.png)<br>`FScalableFloats` 是一种可以指向数据表的结构，该数据表以变量为行，以等级为列。可缩放浮点数会自动读取指定表格行在能力当前等级（或不同等级，如果在[`GameplayEffectSpec`](#concepts-ge-spec)中被覆盖）下的值。该值还可以通过系数进一步操作。如果没有指定数据表/行，则会将该值视为 1，因此可以使用系数在所有等级中硬性编码一个值。                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `Attribute Based`          | `Attribute Based` `Modifiers` take the `CurrentValue` or `BaseValue` of a backing `Attribute` on the `Source` (who created the `GameplayEffectSpec`) or `Target` (who received the `GameplayEffectSpec`) and further modifies it with a coefficient and pre and post coefficient additions. `Snapshotting` means the backing `Attribute` is captured when the `GameplayEffectSpec` is created whereas no snapshotting means the `Attribute` is captured when the `GameplayEffectSpec` is applied.<br>基于属性的修改器会获取源（创建了 `GameplayEffectSpec` 的）或目标（接收了 `GameplayEffectSpec` 的）上的后备属性的 `当前值` 或 `基础值` ，并使用系数以及系数前后的附加值对其进行进一步修改。`快照`是指在创建`GameplayEffectSpec`时捕捉后备`属性`，而不快照是指在应用 `GameplayEffectSpec`时捕捉 `属性`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `Custom Calculation Class` | `Custom Calculation Class` provides the most flexibility for complex `Modifiers`. This `Modifier` takes a [`ModifierMagnitudeCalculation`](#concepts-ge-mmc) class and can further manipulate the resulting float value with a coefficient and pre and post coefficient additions.<br>`自定义计算类` 为复杂的`修改器`提供了最大的灵活性。该`修改器`采用 [`ModifierMagnitudeCalculation`](#concepts-ge-mmc) 类，并可通过系数、系数前添加和系数后添加进一步处理生成的浮点数值。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `Set By Caller`            | `SetByCaller` `Modifiers` are values that are set outside of the `GameplayEffect` at runtime by the ability or whoever made the `GameplayEffectSpec` on the `GameplayEffectSpec`. For example, you would use a `SetByCaller` if you want to set the damage to be based on how long the player held down a button to charge the ability. `SetByCallers` are essentially `TMap<FGameplayTag, float>` that live on the `GameplayEffectSpec`. The `Modifier` is just telling the `Aggregator` to look for a `SetByCaller` value associated with the supplied `GameplayTag`. The `SetByCallers` used by `Modifiers` can only use the `GameplayTag` version of the concept. The `FName` version is disabled here. If the `Modifier` is set to `SetByCaller` but a `SetByCaller` with the correct `GameplayTag` does not exist on the `GameplayEffectSpec`, the game will throw a runtime error and return a value of 0. This might cause issues in the case of a `Divide` operation. See [`SetByCallers`](#concepts-ge-spec-setbycaller) for more information on how to use `SetByCallers`. <br>`SetByCaller` `Modifiers` 是在运行时由技能或在 `GameplayEffectSpec` 上制作 `GameplayEffectSpec` 的人在 `GameplayEffect` 外部设置的值。例如，如果您想根据玩家按住按钮为该能力充电的时间来设置伤害，就需要使用 `SetByCaller`。`SetByCallers` 本质上是 `TMap<FGameplayTag, float>`，它位于 `GameplayEffectSpec` 中。`修改器`只是告诉`聚合器`寻找与所提供的`游戏标签`相关联的`SetByCaller`值。修改器使用的`SetByCaller`这里只能使用`游戏标签`。`FName` 版本不可使用。如果 `修改器` 被设置为 `SetByCaller` 但在 `GameplayEffectSpec` 中不存在具有正确 `GameplayTag` 的 `SetByCaller`，游戏将抛出运行时错误并返回 0 值。有关如何使用 `SetByCallers` 的更多信息，请参阅 [`SetByCaller`](#concepts-ge-spec-setbycaller)。 |
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-mods-multiplydivide"></a>
-##### 4.5.4.1 Multiply and Divide Modifiers
-By default, all `Multiply` and `Divide` `Modifiers` are added together before multiplying or dividing them into the `Attribute`'s `BaseValue`.
+##### 4.5.4.1 乘法和除法修改器
+By default, all `Multiply` and `Divide` `Modifiers` are added together before multiplying or dividing them into the `Attribute`'s `BaseValue`.  
+默认情况下，所有 `乘法` 和 `除法` `修改器` 都先求和，然后再乘以或除以它们。
+
 
 ```c++
 float FAggregatorModChannel::EvaluateWithBase(float InlineBaseValue, const FAggregatorEvaluateParameters& Parameters) const
@@ -935,36 +946,49 @@ float FAggregatorModChannel::SumMods(const TArray<FAggregatorMod>& InMods, float
 ```
 *from `GameplayEffectAggregator.cpp`*
 
-Both `Multiply` and `Divide` `Modifiers` have a `Bias` value of `1` in this formula (`Addition` has a `Bias` of `0`). So it would look something like:
+Both `Multiply` and `Divide` `Modifiers` have a `Bias` value of `1` in this formula (`Addition` has a `Bias` of `0`). So it would look something like:  
+对于`乘法`和`除法` `修改器`，这个公式中的`偏移`值为`1`——`加法修改器`的`偏移值`是`0`。所以它看起来像这样：  
 
 ```
 1 + (Mod1.Magnitude - 1) + (Mod2.Magnitude - 1) + ...
 ```
 
-This formula leads to some unexpected results. Firstly, this formula adds all the modifiers together before multiplying or dividing them into the `BaseValue`. Most people would expect it to multiply or divide them together. For example, if you have two `Multiply` modifiers of `1.5`, most people would expect the `BaseValue` to be multiplied by `1.5 x 1.5 = 2.25`. Instead, this adds the `1.5`s together to multiply the `BaseValue` by `2` (`50% increase + another 50% increase = 100% increase`). This was for the example from `GameplayPrediction.h` of a `10%` speed buff on `500` base speed would be `550`. Add another `10%` speed buff and it will be `600`.
+This formula leads to some unexpected results. Firstly, this formula adds all the modifiers together before multiplying or dividing them into the `BaseValue`. Most people would expect it to multiply or divide them together. For example, if you have two `Multiply` modifiers of `1.5`, most people would expect the `BaseValue` to be multiplied by `1.5 x 1.5 = 2.25`. Instead, this adds the `1.5`s together to multiply the `BaseValue` by `2` (`50% increase + another 50% increase = 100% increase`). This was for the example from `GameplayPrediction.h` of a `10%` speed buff on `500` base speed would be `550`. Add another `10%` speed buff and it will be `600`.  
+这个公式导致了一些意想不到的结果。首先，这个公式将所有修改器加在一起，然后再将它们相乘或除以`基础值`。有些人以为它们应该连续相乘或相除。例如，如果你有两个`乘法`修改器值是`1.5`，有些人会以为`基础值`乘以`1.5 x 1.5 = 2.25`。相反，这个公式将`1.5`相加，再乘以`基础值`的`2`（`50% 增长 + 50% 增长 = 100% 增长`）。这是来自`GameplayPrediction.h`的例子：把`10%`速度增益增加到在`500`基础速度上，结果是`550`。如果再加一个`10%`速度增益，结果将是`600`。
 
-Secondly, this formula has some undocumented rules about what values can be used as it was designed with Paragon in mind.
+Secondly, this formula has some undocumented rules about what values can be used as it was designed with Paragon in mind.  
+其次，这个公式在设计时考虑到了 Paragon，因此对于可以使用哪些值有一些未记录的规则。
 
 Rules for `Multiply` and `Divide` multiplication addition formula:
 * `(No more than one value < 1) AND (Any number of values [1, 2))`
 * `OR (One value >= 2)`
 
-The `Bias` in the formula basically subtracts out the integer digit of numbers in the range `[1, 2)`. The first `Modifier`'s `Bias` subtracts out from the starting `Sum` value (set to the `Bias` before the loop) which is why any value by itself works and why one value `< 1` will work with the numbers in the range `[1, 2)`.
+`乘法`和`除法`叠加公式的规则：  
+* `（不超过一个值 < 1）AND（任意多个值 [1, 2)）`  
+* `OR (一个值 >= 2)`  
+
+The `Bias` in the formula basically subtracts out the integer digit of numbers in the range `[1, 2)`. The first `Modifier`'s `Bias` subtracts out from the starting `Sum` value (set to the `Bias` before the loop) which is why any value by itself works and why one value `< 1` will work with the numbers in the range `[1, 2)`.  
+公式中的`Bias`基本上是减去范围`[1, 2) `内数字的整数位数。第一个`修改器`的`偏移值`是从起始的`和`值（循环前设置的`偏移值`）中减去的，这就是为什么任何值都可以工作，以及为什么一个值`< 1`可以与范围`[1, 2)`中的数字一起工作。
 
 Some examples with `Multiply`:  
-Multipliers: `0.5`  
-`1 + (0.5 - 1) = 0.5`, correct
+`乘法`的一些例子：
+Multipliers: `0.5`
+乘数：`0.5`  
+`1 + (0.5 - 1) = 0.5`, 正确
 
-Multipliers: `0.5, 0.5`  
-`1 + (0.5 - 1) + (0.5 - 1) = 0`, incorrect expected `1`? Multiple values less than `1` don't make sense for adding multipliers. Paragon was designed to only use the [greatest negative value for `Multiply` `Modifiers`](#cae-nonstackingge) so there would only ever be at most one value less than `1` multiplying into the `BaseValue`.
+乘数：`0.5, 0.5`  
+`1 + (0.5 - 1) + (0.5 - 1) = 0`, incorrect expected `1`? Multiple values less than `1` don't make sense for adding multipliers. Paragon was designed to only use the [greatest negative value for `Multiply` `Modifiers`](#cae-nonstackingge) so there would only ever be at most one value less than `1` multiplying into the `BaseValue`.  
+`1 + (0.5 - 1) + (0.5 - 1) = 0`, 错误地预期`1`？小于 `1` 的倍数值对乘数叠加没有意义。Paragon 的设计是只使用[最大负值用于`乘法``修改器``](#cae-nonstackingge)，因此最多只有一个小于`1`的值乘入`BaseValue`。
 
-Multipliers: `1.1, 0.5`  
-`1 + (0.5 - 1) + (1.1 - 1) = 0.6`, correct
+乘数：`1.1, 0.5`  
+`1 + (0.5 - 1) + (1.1 - 1) = 0.6`, 正确
 
-Multipliers: `5, 5`  
-`1 + (5 - 1) + (5 - 1) = 9`, incorrect expected `10`. Will always be the `sum of the Modifiers - number of Modifiers + 1`.
+乘数：`5, 5`  
+`1 + (5 - 1) + (5 - 1) = 9`, `10`是错误的. 答案永远是 `乘数的和 - 修改器的个数 + 1`.
 
-Many games will want their `Multiply` and `Divide` `Modifiers` to multiply and divide together before applying to the `BaseValue`. To achieve this, you will need to **change the engine code** for `FAggregatorModChannel::EvaluateWithBase()`.
+
+Many games will want their `Multiply` and `Divide` `Modifiers` to multiply and divide together before applying to the `BaseValue`. To achieve this, you will need to **change the engine code** for `FAggregatorModChannel::EvaluateWithBase()`.  
+许多游戏希望他们的`乘法`和`除法``修改器`在应用到`基础值`之前连乘或连除到一起。为了实现这个目标，您将需要**更改引擎代码**，位置在`FAggregatorModChannel::EvaluateWithBase()`。
 
 ```c++
 float FAggregatorModChannel::EvaluateWithBase(float InlineBaseValue, const FAggregatorEvaluateParameters& Parameters) const
@@ -998,13 +1022,16 @@ float FAggregatorModChannel::MultiplyMods(const TArray<FAggregatorMod>& InMods, 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-mods-gameplaytags"></a>
-##### 4.5.4.2 Gameplay Tags on Modifiers
+##### 4.5.4.2 修改器的游戏内标签
 
-`SourceTags` and `TargetTags` can be set for each [Modifier](#concepts-ge-mods). They work the same like the [`Application Tag requirements`](#concepts-ge-tags) of a `GameplayEffect`. So the tags are considered only when the effect is applied. I.e. when having a periodic, infinite effect, they are only taken into consideration on the first application of the effect but *not* on each periodic execution.
+`SourceTags` and `TargetTags` can be set for each [Modifier](#concepts-ge-mods). They work the same like the [`Application Tag requirements`](#concepts-ge-tags) of a `GameplayEffect`. So the tags are considered only when the effect is applied. I.e. when having a periodic, infinite effect, they are only taken into consideration on the first application of the effect but *not* on each periodic execution.  
+可以为每个[修改器](#concepts-ge-mods)设置`源标签`（SourceTags）和 `目标标签`（TargetTags）。它们的作用与`游戏效果`的[应用标签要求](#concepts-ge-tags) 相同。因此，只有在应用效果时才会考虑这些标签。也就是说，当有一个周期性的无限效果时，只有在第一次应用该效果时才会考虑这些标签，而不是在每次周期性执行时。
 
-`Attribute Based` Modifiers can also set `SourceTagFilter` and `TargetTagFilter`. When determining the magnitude of the attribute which is the source of the `Attribute Based` Modifier, these filters are used to exclude certain Modifiers to that attribute. Modifiers which source or target didn't have all of the tags of the filter are excluded.
+`Attribute Based` Modifiers can also set `SourceTagFilter` and `TargetTagFilter`. When determining the magnitude of the attribute which is the source of the `Attribute Based` Modifier, these filters are used to exclude certain Modifiers to that attribute. Modifiers which source or target didn't have all of the tags of the filter are excluded.  
+`Attribute Based`修改器也可以设置`源标签过滤器`和`目标标签过滤器`。在确定`Attribute Based`修改器的属性作为源的属性时，这些过滤器用于排除某些修改器到该属性。如果修改器没有包含过滤器中的所有标签，则会被排除。
 
-This means in detail: The tags of the source ASC and the target ASC are captured by `GameplayEffects`. The source ASC tags are captured, when the `GameplayEffectSpec` is created, the target ASC tags are captured on execution of the effect. When determining, if a Modifier of an infinite or duration effect "qualifies" to be applied (i.e. its Aggregator qualifies) and those filters are set, the captured tags are compared against the filters.
+This means in detail: The tags of the source ASC and the target ASC are captured by `GameplayEffects`. The source ASC tags are captured, when the `GameplayEffectSpec` is created, the target ASC tags are captured on execution of the effect. When determining, if a Modifier of an infinite or duration effect "qualifies" to be applied (i.e. its Aggregator qualifies) and those filters are set, the captured tags are compared against the filters.  
+具体来说：`游戏效果`捕获源ASC和目标ASC的标签。当`GameplayEffectSpec`创建时，捕获源ASC的标签，当效果被执行时，捕获目标ASC的标签。在确定无限效果或持续效果的修改器是否 "有资格" 应用（即其聚合器有资格）以及这些过滤器是否已设置时，会将捕获的标记与过滤器进行比较。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
