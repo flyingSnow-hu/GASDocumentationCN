@@ -47,8 +47,8 @@
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.4.1 [乘法和除法修改器](#concepts-ge-mods-multiplydivide)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.4.2 [修改器上的游戏标签](#concepts-ge-mods-gameplaytags)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.5 [堆叠游戏效果](#concepts-ge-stacking)  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.6 [Granted Abilities](#concepts-ge-ga)  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.7 [Gameplay Effect Tags](#concepts-ge-tags)  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.6 [授予技能](#concepts-ge-ga)  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.7 [游戏效果标签](#concepts-ge-tags)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.8 [Immunity](#concepts-ge-immunity)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.9 [Gameplay Effect Spec](#concepts-ge-spec)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.9.1 [SetByCallers](#concepts-ge-spec-setbycaller)  
@@ -1037,42 +1037,53 @@ This means in detail: The tags of the source ASC and the target ASC are captured
 
 <a name="concepts-ge-stacking"></a>
 #### 4.5.5 Stacking Gameplay Effects
+#### 4.5.5 堆叠游戏效果
 `GameplayEffects` by default will apply new instances of the `GameplayEffectSpec` that don't know or care about previously existing instances of the `GameplayEffectSpec` on application. `GameplayEffects` can be set to stack where instead of a new instance of the `GameplayEffectSpec` is added, the currently existing `GameplayEffectSpec's` stack count is changed. Stacking only works for `Duration` and `Infinite` `GameplayEffects`.
+
+默认情况下，`游戏效果`将应用`GameplayEffectSpec`的新实例，这些实例不知道也不关心以前存在的`GameplayEffectSpec`实例。`游戏效果`可以设置为堆叠，在这种情况下，不会添加`GameplayEffectSpec`的新实例，而是更改当前存在的`GameplayEffectSpec`的堆叠计数。堆叠仅适用于`持续`和`无限`的`游戏效果`。
 
 There are two types of stacking: Aggregate by Source and Aggregate by Target.
 
-| Stacking Type       | Description                                                                                                                          |
+有两种类型的堆叠：按源聚合和按目标聚合。
+
+| Stacking Type / 堆叠类型       | Description / 描述                                                                                                                          |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Aggregate by Source | There is a separate instance of stacks per Source `ASC` on the Target. Each Source can apply X amount of stacks.                     |
-| Aggregate by Target | There is only one instance of stacks on the Target regardless of Source. Each Source can apply a stack up to the shared stack limit. |
+| Aggregate by Source<br>按源聚合 | There is a separate instance of stacks per Source `ASC` on the Target. Each Source can apply X amount of stacks.<br>目标上每个源`ASC`都有单独的堆叠实例。每个源都可以应用X层堆叠。                   |
+| Aggregate by Target<br>按目标聚合| There is only one instance of stacks on the Target regardless of Source. Each Source can apply a stack up to the shared stack limit.<br>目标上只有一个堆叠实例，无论源。每个源都可以堆叠，只要不超过共享堆叠限制。 |
 
 Stacks also have policies for expiration, duration refresh, and period reset. They have helpful hover tooltips in the `GameplayEffect` Blueprint.
+堆栈也有过期、持续时间刷新和周期重置的策略。它们在 `游戏效果` 蓝图中有有用的悬停工具提示。
 
 The Sample Project includes a custom Blueprint node that listens for `GameplayEffect` stack changes. The HUD UMG Widget uses it to update the amount of passive armor stacks that the player has. This `AsyncTask` will live forever until manually called `EndTask()`, which we do in the UMG Widget's `Destruct` event. See `AsyncTaskEffectStackChanged.h/cpp`.
+示例项目中包含一个自定义蓝图节点，可侦听`游戏效果`堆叠的变化。HUD UMG 组件使用它来更新玩家拥有的被动装甲堆叠数量。在手动调用 `EndTask()` 之前，这个 `AsyncTask` 将一直存在，我们会在 UMG Widget 的 `析构` 事件中调用 `EndTask()`。请参阅 `AsyncTaskEffectStackChanged.h/cpp`。
 
-![Listen for GameplayEffect Stack Change BP Node](https://github.com/tranek/GASDocumentation/raw/master/Images/gestackchange.png)
+![监听游戏效果堆叠变化的蓝图节点](https://github.com/tranek/GASDocumentation/raw/master/Images/gestackchange.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-ga"></a>
-#### 4.5.6 Granted Abilities
+#### 4.5.6 授予技能
 `GameplayEffects` can grant new [`GameplayAbilities`](#concepts-ga) to `ASCs`. Only `Duration` and `Infinite` `GameplayEffects` can grant abilities.
+`游戏效果` 可以授予新的 [`游戏技能`](#concepts-ga) 到 `ASCs`。只有 `持续` 和 `无限` `游戏效果` 可以授予技能。
 
 A common usecase for this is when you want to force another player to do something like moving them from a knockback or pull. You would apply a `GameplayEffect` to them that grants them an automatically activating ability (see [Passive Abilities](#concepts-ga-activating-passive) for how to automatically activate an ability when it is granted) that does the desired action to them.
+常见的用例是当你想要强制另一个玩家做某事，比如强制击退或拉动玩家。你会给他们应用一个 `游戏效果`，授予他们一个自动激活的技能（见 [被动技能](#concepts-ga-activating-passive) 了解如何自动激活授予的技能）。
 
 Designers can choose which abilities a `GameplayEffect` grants, what level to grant them at, what [input to bind](#concepts-ga-input) them at and the removal policy for the granted ability.
+设计师可以配置 `游戏效果` 可以授予哪些技能，技能的等级，以及输入的方式，以及所授予技能的移除策略。
 
-| Removal Policy             | Description                                                                                                                                                                     |
+| Removal Policy / 移除策略             | Description / 描述                                                                                                                                                                     |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cancel Ability Immediately | The granted ability is canceled and removed immediately when the `GameplayEffect` that granted it is removed from the Target.                                                   |
-| Remove Ability on End      | The granted ability is allowed to finish and then is removed from the Target.                                                                                                   |
-| Do Nothing                 | The granted ability is not affected by the removal of the granting `GameplayEffect` from the Target. The Target has the ability permanently until it is manually removed later. |
+| Cancel Ability Immediately<br>立刻移除 | The granted ability is canceled and removed immediately when the `GameplayEffect` that granted it is removed from the Target.<br>当授予该能力的 `游戏效果` 从目标身上移除时，授予的能力会被立即取消和移除。                                                   |
+| Remove Ability on End<br>技能结束时移除      | The granted ability is allowed to finish and then is removed from the Target.<br>赋予的能力允许自然结束，然后从目标身上移除。                                                                                                   |
+| Do Nothing<br>什么也不做                 | The granted ability is not affected by the removal of the granting `GameplayEffect` from the Target. The Target has the ability permanently until it is manually removed later. <br>当赋予该能力的`游戏效果`从目标身上移除时，所赋予的技能不受影响。目标将永久拥有该能力，直到被手动移除。|
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-tags"></a>
-#### 4.5.7 Gameplay Effect Tags
-`GameplayEffects` carry multiple [`GameplayTagContainers`](#concepts-gt). Designers will edit the `Added` and `Removed` `GameplayTagContainers` for each category and the result will show up in the `Combined` `GameplayTagContainer` on compilation. `Added` tags are new tags that this `GameplayEffect` adds that its parents did not previously have. `Removed` tags are tags that parent classes have but this subclass does not have.
+#### 4.5.7 游戏效果标签
+`GameplayEffects` carry multiple [`GameplayTagContainers`](#concepts-gt). Designers will edit the `Added` and `Removed` `GameplayTagContainers` for each category and the result will show up in the `Combined` `GameplayTagContainer` on compilation. `Added` tags are new tags that this `GameplayEffect` adds that its parents did not previously have. `Removed` tags are tags that parent classes have but this subclass does not have.  
+`游戏效果` 有多个 [`GameplayTagContainer`](#concepts-gt). 设计者将为每个类别编辑 `Added` 和 `Removed` `GameplayTagContainer`，编译后的结果将显示在 `Combined` `GameplayTagContainer` 上。 `Added` 标签是这个 `GameplayEffect` 添加的新标签，而且其父类之前没有这些标签。 `Removed` 标签是父类具有但这个子类不具有的标签。
 
 | Category                          | Description                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1080,7 +1091,15 @@ Designers can choose which abilities a `GameplayEffect` grants, what level to gr
 | Granted Tags                      | Tags that live on the `GameplayEffect` but are also given to the `ASC` that the `GameplayEffect` is applied to. They are removed from the `ASC` when the `GameplayEffect` is removed. This only works for `Duration` and `Infinite` `GameplayEffects`.                                                                                                                             |
 | Ongoing Tag Requirements          | Once applied, these tags determine whether the `GameplayEffect` is on or off. A `GameplayEffect` can be off and still be applied. If a `GameplayEffect` is off due to failing the Ongoing Tag Requirements, but the requirements are then met, the `GameplayEffect` will turn on again and reapply its modifiers. This only works for `Duration` and `Infinite` `GameplayEffects`. |
 | Application Tag Requirements      | Tags on the Target that determine if a `GameplayEffect` can be applied to the Target. If these requirements are not met, the `GameplayEffect` is not applied.                                                                                                                                                                                                                      |
-| Remove Gameplay Effects with Tags | `GameplayEffects` on the Target that have any of these tags in their `Asset Tags` or `Granted Tags` will be removed from the Target when this `GameplayEffect` is successfully applied.                                                                                                                                                                                            |
+| Remove Gameplay Effects with Tags | `GameplayEffects` on the Target that have any of these tags in their `Asset Tags` or `Granted Tags` will be removed from the Target when this `GameplayEffect` is successfully applied.            
+
+| 类别                          | 描述                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gameplay Effect Asset Tags<br>游戏效果资源标签        | Tags that the `GameplayEffect` has. They do not do any function on their own and serve only the purpose of describing the `GameplayEffect`.<br>`游戏效果`的标签。它们本身没有任何功能，只起到描述`游戏效果`的作用。                                                                                                                                                                                                                                        |
+| Granted Tags<br>授予标签                      | Tags that live on the `GameplayEffect` but are also given to the `ASC` that the `GameplayEffect` is applied to. They are removed from the `ASC` when the `GameplayEffect` is removed. This only works for `Duration` and `Infinite` `GameplayEffects`.<br>存在于`游戏效果`上的标签，但也会被赋予应用了 `游戏效果`的`ASC`。当`游戏效果`被移除时，这些标签也会从`ASC`中移除。这只适用于 `持续` 和 `无限` `游戏效果`。                                                                                                                             |
+| Ongoing Tag Requirements<br>持续要求标签          | Once applied, these tags determine whether the `GameplayEffect` is on or off. A `GameplayEffect` can be off and still be applied. If a `GameplayEffect` is off due to failing the Ongoing Tag Requirements, but the requirements are then met, the `GameplayEffect` will turn on again and reapply its modifiers. This only works for `Duration` and `Infinite` `GameplayEffects`. <br>一旦应用，这些标签将决定`游戏效果`是打开还是关闭。`游戏效果`可以是关闭的，但仍然可以应用。如果一个`游戏效果`由于未能满足持续标签要求而关闭，但随后又满足了要求，那么该`游戏效果`将再次开启并重新应用其修饰器。这只对`持续`和`无限`的`游戏效果`有效。|
+| Application Tag Requirements<br>应用要求标签      | Tags on the Target that determine if a `GameplayEffect` can be applied to the Target. If these requirements are not met, the `GameplayEffect` is not applied.<br>目标上的 `标签` 决定`游戏效果`是否可以应用到目标上。如果不满足这些要求，`游戏效果`就不会应用。                                                                                                                                                                                                                      |
+| Remove Gameplay Effects with Tags<br>使用标签删除游戏效果 | `GameplayEffects` on the Target that have any of these tags in their `Asset Tags` or `Granted Tags` will be removed from the Target when this `GameplayEffect` is successfully applied.  <br>当成功应用该`游戏效果`时，目标上的`资产标签`或`授予标签`中包含这些标签的`游戏效果`将从目标上移除                                                                                                                                            |
 
 **[⬆ 回到顶部](#table-of-contents)**
 
