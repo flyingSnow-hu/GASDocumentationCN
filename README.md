@@ -49,9 +49,9 @@
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.5 [堆叠游戏效果](#concepts-ge-stacking)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.6 [授予技能](#concepts-ge-ga)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.7 [游戏效果标签](#concepts-ge-tags)  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.8 [Immunity](#concepts-ge-immunity)  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.9 [Gameplay Effect Spec](#concepts-ge-spec)  
->    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.9.1 [SetByCallers](#concepts-ge-spec-setbycaller)  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.8 [免疫](#concepts-ge-immunity)  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.9 [游戏效果实例](#concepts-ge-spec)  
+>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.9.1 [SetByCaller](#concepts-ge-spec-setbycaller)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.10 [Gameplay Effect Context](#concepts-ge-context)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.11 [Modifier Magnitude Calculation](#concepts-ge-mmc)  
 >    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.5.12 [Gameplay Effect Execution Calculation](#concepts-ge-ec)  
@@ -424,7 +424,7 @@ void AGDHeroCharacter::OnRep_PlayerState()
 
 `游戏标签`必须在 `DefaultGameplayTags.ini` 中提前定义。UE5 编辑器在项目设置中提供了一个界面，让开发者无需手动编辑 `DefaultGameplayTags.ini` 即可管理`游戏标签`。标签编辑器可以创建、重命名、搜索引用和删除标签。
 
-![项目设置里的标签编辑器](https://github.com/tranek/GASDocumentation/raw/master/Images/gameplaytageditor.png)
+![项目设置里的标签编辑器](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gameplaytageditor.png)
 
 搜索`游戏标签`的引用会在编辑器中弹出我们熟悉的引用查看器，显示所有引用`游戏标签`的资产。但这不会显示任何引用`游戏标签`的 C++ 类。
 
@@ -516,7 +516,7 @@ virtual void HealthChanged(const FOnAttributeChangeData& Data);
 
 示例项目中包含一个自定义蓝图节点，将属性值的更改事件封装为 `ASyncTask`。它用于 `UI_HUD` UMG 组件，以更新血量值、法力值和体力值。在手动调用 `EndTask()` 之前，这个 `AsyncTask` 将永远存在，我们在 `UMG` 组件的 `Destruct` 事件中调用了 `EndTask()`。请参见 `AsyncTaskAttributeChanged.h/cpp`。
 
-![监听属性值更改的蓝图节点](https://github.com/tranek/GASDocumentation/raw/master/Images/attributechange.png)
+![监听属性值更改的蓝图节点](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/attributechange.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -534,7 +534,7 @@ virtual void HealthChanged(const FOnAttributeChangeData& Data);
 
 在这个例子中，我们有一个`无限游戏效果（Infinite GameplayEffect）`，它从属性 `TestAttrB` 和 `TestAttrC` 派生出 `TestAttrA` 的值，公式为 `TestAttrA = (TestAttrA + TestAttrB) * ( 2 * TestAttrC)`。每当任何属性值更新时，`TestAttrA` 都会自动重新计算。
 
-![派生属性示例](https://github.com/tranek/GASDocumentation/raw/master/Images/derivedattribute.png)
+![派生属性示例](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/derivedattribute.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -902,7 +902,7 @@ There are four types of `Modifiers`: Scalable Float, Attribute Based, Custom Cal
 
 | `Modifier` Type/`修改器`类型            | Description/描述                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Scalable Float`<br>           | `FScalableFloats` are a structure that can point to a Data Table that has the variables as rows and levels as columns. The Scalable Floats will automatically read the value of the specified table row at the ability's current level (or different level if overriden on the [`GameplayEffectSpec`](#concepts-ge-spec)). This value can further be manipulated by a coefficient. If no Data Table/Row is specified, it treats the value as a 1 so the coefficient can be used to hard code in a single value at all levels. ![ScalableFloat](https://github.com/tranek/GASDocumentation/raw/master/Images/scalablefloats.png)<br>`FScalableFloats` 是一种可以指向数据表的结构，该数据表以变量为行，以等级为列。可缩放浮点数会自动读取指定表格行在能力当前等级（或不同等级，如果在[`GameplayEffectSpec`](#concepts-ge-spec)中被覆盖）下的值。该值还可以通过系数进一步操作。如果没有指定数据表/行，则会将该值视为 1，因此可以使用系数在所有等级中硬性编码一个值。                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `Scalable Float`<br>           | `FScalableFloats` are a structure that can point to a Data Table that has the variables as rows and levels as columns. The Scalable Floats will automatically read the value of the specified table row at the ability's current level (or different level if overriden on the [`GameplayEffectSpec`](#concepts-ge-spec)). This value can further be manipulated by a coefficient. If no Data Table/Row is specified, it treats the value as a 1 so the coefficient can be used to hard code in a single value at all levels. ![ScalableFloat](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/scalablefloats.png)<br>`FScalableFloats` 是一种可以指向数据表的结构，该数据表以变量为行，以等级为列。可缩放浮点数会自动读取指定表格行在能力当前等级（或不同等级，如果在[`GameplayEffectSpec`](#concepts-ge-spec)中被覆盖）下的值。该值还可以通过系数进一步操作。如果没有指定数据表/行，则会将该值视为 1，因此可以使用系数在所有等级中硬性编码一个值。                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `Attribute Based`          | `Attribute Based` `Modifiers` take the `CurrentValue` or `BaseValue` of a backing `Attribute` on the `Source` (who created the `GameplayEffectSpec`) or `Target` (who received the `GameplayEffectSpec`) and further modifies it with a coefficient and pre and post coefficient additions. `Snapshotting` means the backing `Attribute` is captured when the `GameplayEffectSpec` is created whereas no snapshotting means the `Attribute` is captured when the `GameplayEffectSpec` is applied.<br>基于属性的修改器会获取源（创建了 `GameplayEffectSpec` 的）或目标（接收了 `GameplayEffectSpec` 的）上的后备属性的 `当前值` 或 `基础值` ，并使用系数以及系数前后的附加值对其进行进一步修改。`快照`是指在创建`GameplayEffectSpec`时捕捉后备`属性`，而不快照是指在应用 `GameplayEffectSpec`时捕捉 `属性`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `Custom Calculation Class` | `Custom Calculation Class` provides the most flexibility for complex `Modifiers`. This `Modifier` takes a [`ModifierMagnitudeCalculation`](#concepts-ge-mmc) class and can further manipulate the resulting float value with a coefficient and pre and post coefficient additions.<br>`自定义计算类` 为复杂的`修改器`提供了最大的灵活性。该`修改器`采用 [`ModifierMagnitudeCalculation`](#concepts-ge-mmc) 类，并可通过系数、系数前添加和系数后添加进一步处理生成的浮点数值。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `Set By Caller`            | `SetByCaller` `Modifiers` are values that are set outside of the `GameplayEffect` at runtime by the ability or whoever made the `GameplayEffectSpec` on the `GameplayEffectSpec`. For example, you would use a `SetByCaller` if you want to set the damage to be based on how long the player held down a button to charge the ability. `SetByCallers` are essentially `TMap<FGameplayTag, float>` that live on the `GameplayEffectSpec`. The `Modifier` is just telling the `Aggregator` to look for a `SetByCaller` value associated with the supplied `GameplayTag`. The `SetByCallers` used by `Modifiers` can only use the `GameplayTag` version of the concept. The `FName` version is disabled here. If the `Modifier` is set to `SetByCaller` but a `SetByCaller` with the correct `GameplayTag` does not exist on the `GameplayEffectSpec`, the game will throw a runtime error and return a value of 0. This might cause issues in the case of a `Divide` operation. See [`SetByCallers`](#concepts-ge-spec-setbycaller) for more information on how to use `SetByCallers`. <br>`SetByCaller` `Modifiers` 是在运行时由技能或在 `GameplayEffectSpec` 上制作 `GameplayEffectSpec` 的人在 `GameplayEffect` 外部设置的值。例如，如果您想根据玩家按住按钮为该能力充电的时间来设置伤害，就需要使用 `SetByCaller`。`SetByCallers` 本质上是 `TMap<FGameplayTag, float>`，它位于 `GameplayEffectSpec` 中。`修改器`只是告诉`聚合器`寻找与所提供的`游戏标签`相关联的`SetByCaller`值。修改器使用的`SetByCaller`这里只能使用`游戏标签`。`FName` 版本不可使用。如果 `修改器` 被设置为 `SetByCaller` 但在 `GameplayEffectSpec` 中不存在具有正确 `GameplayTag` 的 `SetByCaller`，游戏将抛出运行时错误并返回 0 值。有关如何使用 `SetByCallers` 的更多信息，请参阅 [`SetByCaller`](#concepts-ge-spec-setbycaller)。 |
@@ -1057,7 +1057,7 @@ Stacks also have policies for expiration, duration refresh, and period reset. Th
 The Sample Project includes a custom Blueprint node that listens for `GameplayEffect` stack changes. The HUD UMG Widget uses it to update the amount of passive armor stacks that the player has. This `AsyncTask` will live forever until manually called `EndTask()`, which we do in the UMG Widget's `Destruct` event. See `AsyncTaskEffectStackChanged.h/cpp`.
 示例项目中包含一个自定义蓝图节点，可侦听`游戏效果`堆叠的变化。HUD UMG 组件使用它来更新玩家拥有的被动装甲堆叠数量。在手动调用 `EndTask()` 之前，这个 `AsyncTask` 将一直存在，我们会在 UMG Widget 的 `析构` 事件中调用 `EndTask()`。请参阅 `AsyncTaskEffectStackChanged.h/cpp`。
 
-![监听游戏效果堆叠变化的蓝图节点](https://github.com/tranek/GASDocumentation/raw/master/Images/gestackchange.png)
+![监听游戏效果堆叠变化的蓝图节点](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gestackchange.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -1104,22 +1104,29 @@ Designers can choose which abilities a `GameplayEffect` grants, what level to gr
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-immunity"></a>
-#### 4.5.8 Immunity
-`GameplayEffects` can grant immunity, effectively blocking the application of other `GameplayEffects`, based on [`GameplayTags`](#concepts-gt). While immunity can be effectively achieved through other means like `Application Tag Requirements`, using this system provides a delegate for when `GameplayEffects` are blocked due to immunity `UAbilitySystemComponent::OnImmunityBlockGameplayEffectDelegate`.
+#### 4.5.8 免疫 / Immunity
+`GameplayEffects` can grant immunity, effectively blocking the application of other `GameplayEffects`, based on [`GameplayTags`](#concepts-gt). While immunity can be effectively achieved through other means like `Application Tag Requirements`, using this system provides a delegate for when `GameplayEffects` are blocked due to immunity `UAbilitySystemComponent::OnImmunityBlockGameplayEffectDelegate`.  
+`游戏效果`可以带有免疫功能，从而有效地阻止其他`游戏效果`的应用，基于[`游戏标签`](#concepts-gt)。虽然免疫可以通过其他方式实现，比如通过`应用要求标签（Application Tag Requirements）`的方法，但免疫系统提供了一个委托，当游戏效果由于免疫被阻止时会触发`UAbilitySystemComponent::OnImmunityBlockGameplayEffectDelegate`。
+
 
 `GrantedApplicationImmunityTags` checks if the Source `ASC` (including tags from the Source ability's `AbilityTags` if there was one) has any of the specified tags. This is a way to provide immunity from all `GameplayEffects` from certain characters or sources based on their tags.
+`GrantedApplicationImmunityTags`检查源`ASC`（包括源能力的`技能标签`，如果有的话）是否有指定的标签。这是一种提供免疫的方法，可以基于它们的标签从特定角色或源中免疫所有`游戏效果`。
 
-`Granted Application Immunity Query` checks the incoming `GameplayEffectSpec` if it matches any of the queries to block or allow its application.
+`Granted Application Immunity Query` checks the incoming `GameplayEffectSpec` if it matches any of the queries to block or allow its application.  
+`Granted Application Immunity Query`检查传入的`GameplayEffectSpec`是否与阻止或允许其应用的任何查询匹配。
 
 The queries have helpful hover tooltips in the `GameplayEffect` Blueprint.
+在`游戏效果`蓝图中，查询上会带有悬停提示。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-spec"></a>
-#### 4.5.9 Gameplay Effect Spec
-The [`GameplayEffectSpec`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectSpec/index.html) (`GESpec`) can be thought of as the instantiations of `GameplayEffects`. They hold a reference to the `GameplayEffect` class that they represent, what level it was created at, and who created it. These can be freely created and modified at runtime before application unlike `GameplayEffects` which should be created by designers prior to runtime. When applying a `GameplayEffect`, a `GameplayEffectSpec` is created from the `GameplayEffect` and that is actually what is applied to the Target.
+#### 4.5.9 游戏效果实例 / Gameplay Effect Spec
+The [`GameplayEffectSpec`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectSpec/index.html) (`GESpec`) can be thought of as the instantiations of `GameplayEffects`. They hold a reference to the `GameplayEffect` class that they represent, what level it was created at, and who created it. These can be freely created and modified at runtime before application unlike `GameplayEffects` which should be created by designers prior to runtime. When applying a `GameplayEffect`, a `GameplayEffectSpec` is created from the `GameplayEffect` and that is actually what is applied to the Target.  
+[`GameplayEffectSpec`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectSpec/index.html)（`GESpec`）可以被认为是`游戏效果`的实例。它持有对表示它们的`游戏效果`类的引用，以及它被创建时的等级，以及谁创建了它。与设计师预先创建的`游戏效果`不同，`GESpec`可以在运行时自由创建和修改。当应用`游戏效果`时，会从`游戏效果`创建一个`GESpec`，实际上应用到目标上的是它而非`游戏效果`。
 
-`GameplayEffectSpecs` are created from `GameplayEffects` using `UAbilitySystemComponent::MakeOutgoingSpec()` which is `BlueprintCallable`. `GameplayEffectSpecs` do not have to be immediately applied. It is common to pass a `GameplayEffectSpec` to a projectile created from an ability that the projectile can apply to the target it hits later. When `GameplayEffectSpecs` are successfully applied, they return a new struct called `FActiveGameplayEffect`.
+`GameplayEffectSpecs` are created from `GameplayEffects` using `UAbilitySystemComponent::MakeOutgoingSpec()` which is `BlueprintCallable`. `GameplayEffectSpecs` do not have to be immediately applied. It is common to pass a `GameplayEffectSpec` to a projectile created from an ability that the projectile can apply to the target it hits later. When `GameplayEffectSpecs` are successfully applied, they return a new struct called `FActiveGameplayEffect`.  
+`GameplayEffectSpec`是由`UAbilitySystemComponent::MakeOutgoingSpec()`创建的，该函数可以从蓝图调用。`GameplayEffectSpec`可能不会立即应用。一个很常见的手段是将`GameplayEffectSpec`传递给技能创建的子弹，并在稍后将其应用于击中的目标。当`GameplayEffectSpec`成功应用时，它们会返回一个新的结构体，称为`FActiveGameplayEffect`。
 
 Notable `GameplayEffectSpec` Contents:
 * The `GameplayEffect` class that this `GameplayEffect` was created from.
@@ -1131,26 +1138,42 @@ Notable `GameplayEffectSpec` Contents:
 * `Attributes` that were captured at the time of the `GameplayEffectSpec`'s creation due to snapshotting.
 * `DynamicGrantedTags` that the `GameplayEffectSpec` grants to the Target in addition to the `GameplayTags` that the `GameplayEffect` grants.
 * `DynamicAssetTags` that the `GameplayEffectSpec` has in addition to the `AssetTags` that the `GameplayEffect` has.
-* `SetByCaller` `TMaps`.
+* `SetByCaller` `TMaps`.  
+值得注意的`GameplayEffectSpec`内容：
+* 创建此`游戏效果`的`游戏效果`类。
+* 这个`GameplayEffectSpec`的等级。通常与创建`GameplayEffectSpec`的技能的级别相同，但可以不同。
+* 这个`GameplayEffectSpec`的持续时间。默认情况下与`游戏效果`的持续时间相同，但可以不同。
+* 这个`GameplayEffectSpec`的周期，对于周期效果。默认情况下与`游戏效果`的周期相同，但可以不同。
+* 这个`GameplayEffectSpec`的当前堆叠计数。堆叠限制在`游戏效果`上。
+* [`GameplayEffectContextHandle`](#concepts-ge-context)会告诉我们谁创建了这个`GameplayEffectSpec`。
+* 基于快照逻辑，在此`GameplayEffectSpec`创建时被捕获的`属性`。
+* 除了`游戏效果`本身授予的`游戏标签`之外，此`GameplayEffectSpec`授予目标的`DynamicGrantedTag`。
+* 除了`游戏效果`本身具有的`AssetTag`之外，此`GameplayEffectSpec`具有的`DynamicAssetTag`。
+* `SetByCaller` `TMaps`。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-spec-setbycaller"></a>
-##### 4.5.9.1 SetByCallers
-`SetByCallers` allow the `GameplayEffectSpec` to carry float values associated with a `GameplayTag` or `FName` around. They are stored in their respective `TMaps`: `TMap<FGameplayTag, float>` and `TMap<FName, float>` on the `GameplayEffectSpec`. These can be used as `Modifiers` on the `GameplayEffect` or as generic means of ferrying floats around. It is common to pass numerical data generated inside of an ability to [`GameplayEffectExecutionCalculations`](#concepts-ge-ec) or [`ModifierMagnitudeCalculations`](#concepts-ge-mmc) via `SetByCallers`.
+##### 4.5.9.1 SetByCaller
+`SetByCallers` allow the `GameplayEffectSpec` to carry float values associated with a `GameplayTag` or `FName` around. They are stored in their respective `TMaps`: `TMap<FGameplayTag, float>` and `TMap<FName, float>` on the `GameplayEffectSpec`. These can be used as `Modifiers` on the `GameplayEffect` or as generic means of ferrying floats around. It is common to pass numerical data generated inside of an ability to [`GameplayEffectExecutionCalculations`](#concepts-ge-ec) or [`ModifierMagnitudeCalculations`](#concepts-ge-mmc) via `SetByCallers`.  
 
-| `SetByCaller` Use | Notes                                                                                                                                                                                                                                                                                                                                                                                                                               |
+`SetByCaller`允许`GameplayEffectSpec`携带与`GameplayTag`或`FName`相关的浮点值。它们存储在各自`GameplayEffectSpec`上的`TMaps`中：`TMap<FGameplayTag, float>`和`TMap<FName, float>`。它们可以被用作`游戏效果`上的`修改器`，或作为通用的传输浮点值的方式。一种常见的用法是在技能内部，通过`SetByCaller`将数值数据传递给[`GameplayEffectExecutionCalculation`](#concepts-ge-ec) 或 [`ModifierMagnitudeCalculation`](#concepts-ge-mmc)。
+
+| `SetByCaller` 的 用法 | Notes / 要点                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Modifiers`       | Must be defined ahead of time in the `GameplayEffect` class. Can only use the `GameplayTag` version. If one is defined on the `GameplayEffect` class but the `GameplayEffectSpec` does not have the corresponding tag and float value pair, the game will have a runtime error on application of the `GameplayEffectSpec` and return 0. This is a potential problem for a `Divide` operation. See [`Modifiers`](#concepts-ge-mods). |
-| Elsewhere         | Does not need to be defined ahead of time anywhere. Reading a `SetByCaller` that does not exist on a `GameplayEffectSpec` can return a developer defined default value with optional warnings.                                                                                                                                                                                                                                      |
+| `Modifiers` / `修改器`      | Must be defined ahead of time in the `GameplayEffect` class. Can only use the `GameplayTag` version. If one is defined on the `GameplayEffect` class but the `GameplayEffectSpec` does not have the corresponding tag and float value pair, the game will have a runtime error on application of the `GameplayEffectSpec` and return 0. This is a potential problem for a `Divide` operation. See [`Modifiers`](#concepts-ge-mods).<br>必须在`游戏效果`类中提前定义。 只能使用`游戏标签`版本。 如果在`游戏效果`类中定义了一个`修改器`，但是`GameplayEffectSpec`没有相应的标签和浮点数值对，则游戏会在应用`GameplayEffectSpec`时产生一个运行时错误，然后返回0。对于`除法`操作来说，这是一个潜在的问题。 请参阅[`修改器`]（＃concepts-ge-mods）。 |
+| Elsewhere / 其他        | Does not need to be defined ahead of time anywhere. Reading a `SetByCaller` that does not exist on a `GameplayEffectSpec` can return a developer defined default value with optional warnings.   <br>无需在任何地方提前定义。 读取一个在`GameplayEffectSpec`上不存在的`SetByCaller`会返回开发者预定义的默认值，并触发可选的警告。                                                                                                                                                                                                                                   |
 
 To assign `SetByCaller` values in Blueprint, use the Blueprint node for the version that you need (`GameplayTag` or `FName`):
+在蓝图中指定`SetByCaller`值时，请使用您需要的版本的蓝图节点（`GameplayTag`或`FName`）：
 
-![Assigning SetByCaller](https://github.com/tranek/GASDocumentation/raw/master/Images/setbycaller.png)
+![Assigning SetByCaller](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/setbycaller.png)
 
 To read a `SetByCaller` value in Blueprint, you will need to make custom nodes in your Blueprint Library.
+在蓝图中读取`SetByCaller`值时，您需要在您的蓝图库中创建自定义节点。
 
 To assign `SetByCaller` values in C++, use the version of the function that you need (`GameplayTag` or `FName`):
+在C++中指定`SetByCaller`值时，请使用您需要的版本的函数（`GameplayTag`或`FName`）：
 
 ```c++
 void FGameplayEffectSpec::SetSetByCallerMagnitude(FName DataName, float Magnitude);
@@ -1160,6 +1183,7 @@ void FGameplayEffectSpec::SetSetByCallerMagnitude(FGameplayTag DataTag, float Ma
 ```
 
 To read a `SetByCaller` value in C++, use the version of the function that you need (`GameplayTag` or `FName`):
+在C++中读取`SetByCaller`值时，请使用您需要的版本的函数（`GameplayTag`或`FName`）：
 
 ```c++
 float GetSetByCallerMagnitude(FName DataName, bool WarnIfNotFound = true, float DefaultIfNotFound = 0.f) const;
@@ -1169,12 +1193,16 @@ float GetSetByCallerMagnitude(FGameplayTag DataTag, bool WarnIfNotFound = true, 
 ```
 
 I recommend using the `GameplayTag` version over the `FName` version. This can prevent spelling errors in Blueprint.
+我建议使用`GameplayTag`版本而不是`FName`版本。这可以在蓝图中防止拼写错误。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-context"></a>
-#### 4.5.10 Gameplay Effect Context
-The [`GameplayEffectContext`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectContext/index.html) structure holds information about a `GameplayEffectSpec's` instigator and [`TargetData`](#concepts-targeting-data). This is also a good structure to subclass to pass arbitrary data around between places like [`ModifierMagnitudeCalculations`](#concepts-ge-mmc) / [`GameplayEffectExecutionCalculations`](#concepts-ge-ec), [`AttributeSets`](#concepts-as), and [`GameplayCues`](#concepts-gc).
+#### 4.5.10 游戏效果上下文 / Gameplay Effect Context
+The [`GameplayEffectContext`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectContext/index.html) structure holds information about a `GameplayEffectSpec's` instigator and [`TargetData`](#concepts-targeting-data). This is also a good structure to subclass to pass arbitrary data around between places like [`ModifierMagnitudeCalculations`](#concepts-ge-mmc) / [`GameplayEffectExecutionCalculations`](#concepts-ge-ec), [`AttributeSets`](#concepts-as), and [`GameplayCues`](#concepts-gc).  
+
+[`GameplayEffectContext`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectContext/index.html)结构保存有关`GameplayEffectSpec`的发起者和[`TargetData`](#concepts-targeting-data)的信息。它也是一个很好的结构，可以将其子类化以在[`ModifierMagnitudeCalculation`](#concepts-ge-mmc) / [`GameplayEffectExecutionCalculation`](#concepts-ge-ec)、[`AttributeSet`](#concepts-as)和[`GameplayCue`](#concepts-gc)等地方传递任意数据。
+
 
 To subclass the `GameplayEffectContext`:
 
@@ -1185,19 +1213,41 @@ To subclass the `GameplayEffectContext`:
 1. Implement `TStructOpsTypeTraits` for your subclass, like the parent struct `FGameplayEffectContext` has
 1. Override `AllocGameplayEffectContext()` in your [`AbilitySystemGlobals`](#concepts-asg) class to return a new object of your subclass
 
+要将其子类化：
+1. 子类化`FGameplayEffectContext`
+1. 重写`FGameplayEffectContext::GetScriptStruct()`
+1. 重写`FGameplayEffectContext::Duplicate()`
+1. 如果您的数据需要复制，则重写`FGameplayEffectContext::NetSerialize()`
+1. 为您的子类实现`TStructOpsTypeTraits`，就像父结构`FGameplayEffectContext`所做的那样
+1. 在您的[`AbilitySystemGlobals`](#concepts-asg)类中重写`AllocGameplayEffectContext()`以返回新对象类型的实例
+
 [GASShooter](https://github.com/tranek/GASShooter) uses a subclassed `GameplayEffectContext` to add `TargetData` which can be accessed in `GameplayCues`, specifically for the shotgun since it can hit more than one enemy.
+
+[GASShooter](https://github.com/tranek/GASShooter) 使用一个子类化的`GameplayEffectContext`添加`TargetData`，它可以在`GameplayCue`中访问。特别是对于霰弹枪很有用，因为它可以击中多个敌人。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-mmc"></a>
-#### 4.5.11 Modifier Magnitude Calculation
+#### 4.5.11 修改器幅度计算
 [`ModifierMagnitudeCalculations`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayModMagnitudeCalculation/index.html) (`ModMagCalc` or `MMC`) are powerful classes used as [`Modifiers`](#concepts-ge-mods) in `GameplayEffects`. They function similarly to [`GameplayEffectExecutionCalculations`](#concepts-ge-ec) but are less powerful and most importantly they can be [predicted](#concepts-p). Their sole purpose is to return a float value from `CalculateBaseMagnitude_Implementation()`. You can subclass and override this function in Blueprint and C++.
+
+<!--cn-->
+`ModifierMagnitudeCalculation` (`ModMagCalc` or `MMC`) 是强大的类，用于`游戏效果`中的[`修改器`](#concepts-ge-mods)。它们的功能类似于[`GameplayEffectExecutionCalculations`](#concepts-ge-ec)，但功能较弱，最重要的是它们可以[预测](#concepts-p)。它们的唯一目的是从`CalculateBaseMagnitude_Implementation()`返回一个浮点值。您可以在蓝图和C++中子类化和重写这个函数。
+<!--/cn-->
 
 `MMCs` can be used in any duration of `GameplayEffects` - `Instant`, `Duration`, `Infinite`, or `Periodic`.
 
+<!--cn-->
+`MMC`可以在任何类型`游戏效果`起作用 - `立即`，`持续`，`无限`或`周期`。  
+<!--/cn-->
+  
 `MMCs'` strength lies in their capability to capture the value of any number of `Attributes` on the `Source` or the `Target` of `GameplayEffect` with full access to the `GameplayEffectSpec` to read `GameplayTags` and `SetByCallers`. `Attributes` can either be snapshotted or not. Snapshotted `Attributes` are captured when the `GameplayEffectSpec` is created whereas non snapshotted `Attributes` are captured when the `GameplayEffectSpec` is applied and automatically update when the `Attribute` changes for `Infinite` and `Duration` `GameplayEffects`. Capturing `Attributes` recalculates their `CurrentValue` from existing mods on the `ASC`. This recalculation will **not** run [`PreAttributeChange()`](#concepts-as-preattributechange) in the `AbilitySet` so any clamping must be done here again.
 
-| Snapshot | Source or Target | Captured on `GameplayEffectSpec` | Automatically updates when `Attribute` changes for `Infinite` or `Duration` `GE` |
+<!--cn-->  
+`MMC`的强度依赖于它们捕获`游戏效果`在任何`属性`上的`源`或`目标`的值的能力，并且完全访问`游戏效果实例`以读取`游戏标签`和`SetByCaller`。`属性`可以快照或不快照。快照的`属性`是在`游戏效果实例`创建时被捕捉，而非快照的`属性`是在`游戏效果实例`应用时被捕捉，并且在`无限`和`持续``游戏效果`上，当`属性`改变时自动更新。捕捉`属性`会在现有的`ASC`上重新计算它们的`当前值`。这个重新计算将**不会**在`AbilitySet`中运行[`PreAttributeChange()`](#concepts-as-preattributechange)，所以如果任何限值必须在这里再做一次。
+<!--/cn-->
+
+| Snapshot / 快照 | Source or Target /源还是目标 | Captured on `GameplayEffectSpec` / 从`GEC`捕捉快照的时间| Automatically updates when `Attribute` changes for `Infinite` or `Duration` `GE` / 属性变化时自动更新|
 | -------- | ---------------- | -------------------------------- | -------------------------------------------------------------------------------- |
 | Yes      | Source           | Creation                         | No                                                                               |
 | Yes      | Target           | Application                      | No                                                                               |
@@ -1206,7 +1256,16 @@ To subclass the `GameplayEffectContext`:
 
 The resultant float from an `MMC` can further be modified in the `GameplayEffect's` `Modifier` by a coefficient and a pre and post coefficient addition.
 
+<!--cn-->
+`MMC`的结果可以进一步通过系数和预加系数和后加系数修改`游戏效果`的`修改器`。
+<!--/cn-->
+
 An example `MMC` that captures the `Target's` mana `Attribute` reduces it from a poison effect where the amount reduced changes depending on how much mana the `Target` has and a tag that the `Target` might have:
+
+<!--cn-->
+以下是一个示例`MMC`，它捕捉`目标`的法力`属性`，造成一种法力流失的中毒效果，减少的量取决于`目标`的`法力`有多少，以及`目标`可能拥有的标签：
+<!--/cn-->
+
 ```c++
 UPAMMC_PoisonMana::UPAMMC_PoisonMana()
 {
@@ -1262,6 +1321,10 @@ float UPAMMC_PoisonMana::CalculateBaseMagnitude_Implementation(const FGameplayEf
 
 If you don't add the `FGameplayEffectAttributeCaptureDefinition` to `RelevantAttributesToCapture` in the `MMC's` constructor and try to capture `Attributes`, you will get an error about a missing Spec while capturing. If you don't need to capture `Attributes`, then you don't have to add anything to `RelevantAttributesToCapture`.
 
+<!--cn-->
+如果你没有将`FGameplayEffectAttributeCaptureDefinition`添加到`MMC`的构造函数中的`RelevantAttributesToCapture`，但尝试捕获`属性`，你将得到一个关于捕获实例的错误。如果你不需要捕获`属性`，那么你就不需要添加任何东西到`RelevantAttributesToCapture`。
+<!--/cn-->
+
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-ec"></a>
@@ -1306,7 +1369,7 @@ If you want to hardcode values to a `GameplayEffect`, you can pass them in using
 
 In this screenshot example, we're adding 50 to the captured Damage `Attribute`. You could also set this to `Override` to just take in only the hardcoded value.
 
-![Backing Data Attribute Calculation Modifier](https://github.com/tranek/GASDocumentation/raw/master/Images/calculationmodifierbackingdataattribute.png)
+![Backing Data Attribute Calculation Modifier](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/calculationmodifierbackingdataattribute.png)
 
 The `ExecutionCalculation` reads this value in when it captures the `Attribute`.
 
@@ -1322,7 +1385,7 @@ If you want to hardcode values to a `GameplayEffect`, you can pass them in using
 
 In this screenshot example, we're adding 50 to a `Temporary Variable` using the `Data.Damage` `GameplayTag`.
 
-![Backing Data Temporary Variable Calculation Modifier](https://github.com/tranek/GASDocumentation/raw/master/Images/calculationmodifierbackingdatatempvariable.png)
+![Backing Data Temporary Variable Calculation Modifier](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/calculationmodifierbackingdatatempvariable.png)
 
 Add backing `Temporary Variables` to your `ExecutionCalculation`'s constructor:
 
@@ -1406,7 +1469,7 @@ UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cost")
 FScalableFloat Cost;
 ```
 
-![Cost GE With MMC](https://github.com/tranek/GASDocumentation/raw/master/Images/costmmc.png)
+![Cost GE With MMC](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/costmmc.png)
 
 2. **Override `UGameplayAbility::GetCostGameplayEffect()`.** Override this function and [create a `GameplayEffect` at runtime](#concepts-ge-dynamic) that reads the cost value on the `GameplayAbility`.
 
@@ -1467,7 +1530,7 @@ void UPGGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, 
 
 In this picture, the cooldown's duration `Modifier` is set to `SetByCaller` with a `Data Tag` of `Data.Cooldown`. `Data.Cooldown` would be `OurSetByCallerTag` in the code above.
 
-![Cooldown GE with SetByCaller](https://github.com/tranek/GASDocumentation/raw/master/Images/cooldownsbc.png)
+![Cooldown GE with SetByCaller](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/cooldownsbc.png)
 
 2. **Use an [`MMC`](#concepts-ge-mmc).** This has the same setup as above except for setting the `SetByCaller` as the duration on the `Cooldown GE` and in `ApplyCooldown`. Instead, set the duration to be a `Custom Calculation Class` and point to the new `MMC` that we will make.
 ```c++
@@ -1527,7 +1590,7 @@ float UPGMMC_HeroAbilityCooldown::CalculateBaseMagnitude_Implementation(const FG
 }
 ```
 
-![Cooldown GE with MMC](https://github.com/tranek/GASDocumentation/raw/master/Images/cooldownmmc.png)
+![Cooldown GE with MMC](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/cooldownmmc.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -1579,7 +1642,7 @@ To listen for when a cooldown ends, you can either respond to when the `Cooldown
 
 The Sample Project includes a custom Blueprint node that listens for cooldowns beginning and ending. The HUD UMG Widget uses it to update the amount of time remaining on the Meteor's cooldown. This `AsyncTask` will live forever until manually called `EndTask()`, which we do in the UMG Widget's `Destruct` event. See [`AsyncTaskCooldownChanged.h/cpp`](Source/GASDocumentation/Private/Characters/Abilities/AsyncTaskCooldownChanged.cpp).
 
-![Listen for Cooldown Change BP Node](https://github.com/tranek/GASDocumentation/raw/master/Images/cooldownchange.png)
+![Listen for Cooldown Change BP Node](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/cooldownchange.png)
 
 <a name="concepts-ge-cooldown-prediction"></a>
 ##### 4.5.15.3 Predicting Cooldowns
@@ -1721,7 +1784,7 @@ Epic's [Action RPG Sample Project](https://www.unrealengine.com/marketplace/en-U
 
 To access the `GESpecs` inside of the `GameplayEffectContainers` to do things like adding `SetByCallers`, break the `FGameplayEffectContainer` and access the `GESpec` reference by its index in the array of `GESpecs`. This requires that you know the index ahead of time of the `GESpec` that you want to access.
 
-![SetByCaller with a GameplayEffectContainer](https://github.com/tranek/GASDocumentation/raw/master/Images/gecontainersetbycaller.png)
+![SetByCaller with a GameplayEffectContainer](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gecontainersetbycaller.png)
 
 `GameplayEffectContainers` also contain an optional efficient means of [targeting](#concepts-targeting-containers).
 
@@ -1757,11 +1820,11 @@ These are not rules, just my recommendations. Your design and implementations ma
 All `GameplayAbilities` will have their `ActivateAbility()` function overriden with your gameplay logic. Additional logic can be added to `EndAbility()` that runs when the `GameplayAbility` completes or is canceled.
 
 Flowchart of a simple `GameplayAbility`:
-![Simple GameplayAbility Flowchart](https://github.com/tranek/GASDocumentation/raw/master/Images/abilityflowchartsimple.png)
+![Simple GameplayAbility Flowchart](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/abilityflowchartsimple.png)
 
 
 Flowchart of a more complex `GameplayAbility`:
-![Complex GameplayAbility Flowchart](https://github.com/tranek/GASDocumentation/raw/master/Images/abilityflowchartcomplex.png)
+![Complex GameplayAbility Flowchart](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/abilityflowchartcomplex.png)
 
 Complex abilities can be implemented using multiple `GameplayAbilities` that interact (activate, cancel, etc) with each other.
 
@@ -2026,7 +2089,7 @@ LogAbilitySystem: Display: InternalServerTryActivateAbility. Rejecting ClientAct
 LogAbilitySystem: Display: ClientActivateAbilityFailed_Implementation. PredictionKey :109 Ability: Default__GA_FireGun_C
 ```
 
-![Activation Failed Tags Displayed in showdebug AbilitySystem](https://github.com/tranek/GASDocumentation/raw/master/Images/activationfailedtags.png)
+![Activation Failed Tags Displayed in showdebug AbilitySystem](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/activationfailedtags.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -2226,7 +2289,7 @@ GASShooter reuses the same batched `GameplayAbility` for semi-automatic and full
 
 GASShooter exposes a Blueprint node to allow batching abilities which the aforementioned local-only ability uses to trigger the batched ability.
 
-![Activate Batched Ability](https://github.com/tranek/GASDocumentation/raw/master/Images/batchabilityactivate.png)
+![Activate Batched Ability](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/batchabilityactivate.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -2299,7 +2362,7 @@ Task->ReadyForActivation();
 
 In Blueprint, we just use the Blueprint node that we create for the `AbilityTask`. We don't have to call `ReadyForActivation()`. That is automatically called by `Engine/Source/Editor/GameplayTasksEditor/Private/K2Node_LatentGameplayTaskCall.cpp`. `K2Node_LatentGameplayTaskCall` also automatically calls `BeginSpawningActor()` and `FinishSpawningActor()` if they exist in your `AbilityTask` class (see `AbilityTask_WaitTargetData`). To reiterate, `K2Node_LatentGameplayTaskCall` only does automagic sorcery for Blueprint. In C++, we have to manually call `ReadyForActivation()`, `BeginSpawningActor()`, and `FinishSpawningActor()`.
 
-![Blueprint WaitTargetData AbilityTask](https://github.com/tranek/GASDocumentation/raw/master/Images/abilitytask.png)
+![Blueprint WaitTargetData AbilityTask](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/abilitytask.png)
 
 To manually cancel an `AbilityTask`, just call `EndTask()` on the `AbilityTask` object in Blueprint (called `Async Task Proxy`) or in C++.
 
@@ -2346,11 +2409,11 @@ The Sample Project includes a `GameplayCueNotify_Actor` for stun and sprint effe
 
 From inside of a `GameplayEffect` when it is successfully applied (not blocked by tags or immunity), fill in the `GameplayTags` of all the `GameplayCues` that should be triggered.
 
-![GameplayCue Triggered from a GameplayEffect](https://github.com/tranek/GASDocumentation/raw/master/Images/gcfromge.png)
+![GameplayCue Triggered from a GameplayEffect](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gcfromge.png)
 
 `UGameplayAbility` offers Blueprint nodes to `Execute`, `Add`, or `Remove` `GameplayCues`.
 
-![GameplayCue Triggered from a GameplayAbility](https://github.com/tranek/GASDocumentation/raw/master/Images/gcfromga.png)
+![GameplayCue Triggered from a GameplayAbility](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gcfromga.png)
 
 In C++, you can call functions directly on the `ASC` (or expose them to Blueprint in your `ASC` subclass):
 
@@ -2854,7 +2917,7 @@ FGameplayTargetDataFilterHandle UGDTargetDataFilterBlueprintLibrary::MakeGDNameF
 [`AGameplayAbilityWorldReticles`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/Abilities/AGameplayAbilityWorldReticle/index.html) (`Reticles`) visualize **who** you are targeting when targeting with non-`Instant` confirmed [`TargetActors`](#concepts-targeting-actors). `TargetActors` are responsible for the spawn and destroy lifetimes for all `Reticles`. `Reticles` are `AActors` so they can use any kind of visual component for representation. A common implementation as seen in [GASShooter](https://github.com/tranek/GASShooter) is to use a `WidgetComponent` to display a UMG Widget in screen space (always facing the player's camera). `Reticles` do not know which `AActor` that they're on, but you could subclass in that functionality on a custom `TargetActor`. `TargetActors` will typically update the `Reticle`'s location to the target's location on every `Tick()`.
 
 GASShooter uses `Reticles` to show locked-on targets for the rocket launcher's secondary ability's homing rockets. The red indicator on the enemy is the `Reticle`. The similar white image is the rocket launcher's crosshair.
-![Reticles in GASShooter](https://github.com/tranek/GASDocumentation/raw/master/Images/gameplayabilityworldreticle.png)
+![Reticles in GASShooter](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gameplayabilityworldreticle.png)
 
 `Reticles` come with a handful of `BlueprintImplementableEvents` for designers (they're intended to be developed in Blueprints):
 
@@ -3018,13 +3081,13 @@ UE_ENABLE_OPTIMIZATION
 Type `showdebug abilitysystem` in the in-game console. This feature is split into three "pages". All three pages will show the `GameplayTags` that you currently have. Type `AbilitySystem.Debug.NextCategory` into the console to cycle between the pages.
 
 The first page shows the `CurrentValue` of all of your `Attributes`:
-![First Page of showdebug abilitysystem](https://github.com/tranek/GASDocumentation/raw/master/Images/showdebugpage1.png)
+![First Page of showdebug abilitysystem](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/showdebugpage1.png)
 
 The second page shows all of the `Duration` and `Infinite` `GameplayEffects` on you, their number of stacks, what `GameplayTags` they give, and what `Modifiers` they give.
-![Second Page of showdebug abilitysystem](https://github.com/tranek/GASDocumentation/raw/master/Images/showdebugpage2.png)
+![Second Page of showdebug abilitysystem](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/showdebugpage2.png)
 
 The third page shows all of the `GameplayAbilities` that have been granted to you, whether they are currently running, whether they are blocked from activating, and the status of currently running `AbilityTasks`.
-![Third Page of showdebug abilitysystem](https://github.com/tranek/GASDocumentation/raw/master/Images/showdebugpage3.png)
+![Third Page of showdebug abilitysystem](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/showdebugpage3.png)
 
 To cycle between targets (denoted by a green rectangular prism around the Actor), use the `PageUp` key or `NextDebugTarget` console command to go to the next target and the `PageDown` key or `PreviousDebugTarget` console command to go to the previous target.
 
@@ -3044,7 +3107,7 @@ GAS adds functionality to the Gameplay Debugger. Access the Gameplay Debugger wi
 
 Use the Gameplay Debugger when you want to see the `GameplayTags`, `GameplayEffects`, and `GameplayAbilities` on **other** `Characters`. Unfortunately it does not show the `CurrentValue` of the target's `Attributes`. It will target whatever `Character` is in the center of your screen. You can change targets by selecting them in the World Outliner in the Editor or by looking at a different `Character` and press Apostrophe (') again. The currently inspected `Character` has the largest red circle above it.
 
-![Gameplay Debugger](https://github.com/tranek/GASDocumentation/raw/master/Images/gameplaydebugger.png)
+![Gameplay Debugger](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gameplaydebugger.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -3133,15 +3196,15 @@ To increase designer-friendly iteration times, especially when designing UMG Wid
 
 Listen for `Attribute` changes:
 
-![Listen for Attributes Changes BP Node](https://github.com/tranek/GASDocumentation/raw/master/Images/attributeschange.png)
+![Listen for Attributes Changes BP Node](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/attributeschange.png)
 
 Listen for cooldown changes:
 
-![Listen for Cooldown Change BP Node](https://github.com/tranek/GASDocumentation/raw/master/Images/cooldownchange.png)
+![Listen for Cooldown Change BP Node](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/cooldownchange.png)
 
 Listen for `GE` stack changes:
 
-![Listen for GameplayEffect Stack Change BP Node](https://github.com/tranek/GASDocumentation/raw/master/Images/gestackchange.png)
+![Listen for GameplayEffect Stack Change BP Node](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/gestackchange.png)
 
 **[⬆ 回到顶部](#table-of-contents)**
 
