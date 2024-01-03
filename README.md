@@ -1322,7 +1322,7 @@ float UPAMMC_PoisonMana::CalculateBaseMagnitude_Implementation(const FGameplayEf
 If you don't add the `FGameplayEffectAttributeCaptureDefinition` to `RelevantAttributesToCapture` in the `MMC's` constructor and try to capture `Attributes`, you will get an error about a missing Spec while capturing. If you don't need to capture `Attributes`, then you don't have to add anything to `RelevantAttributesToCapture`.
 
 <!--cn-->
-如果你没有将`FGameplayEffectAttributeCaptureDefinition`添加到`MMC`的构造函数中的`RelevantAttributesToCapture`，但尝试捕获`属性`，你将得到一个关于捕获实例的错误。如果你不需要捕获`属性`，那么你就不需要添加任何东西到`RelevantAttributesToCapture`。
+如果尝试捕获`属性`之前，你没有将`FGameplayEffectAttributeCaptureDefinition`添加到`MMC`的构造函数中的`RelevantAttributesToCapture`，会得到一个关于捕获实例的错误。如果你不需要捕获`属性`，那么你就不需要添加任何东西到`RelevantAttributesToCapture`。
 <!--/cn-->
 
 **[⬆ 回到顶部](#table-of-contents)**
@@ -1331,9 +1331,21 @@ If you don't add the `FGameplayEffectAttributeCaptureDefinition` to `RelevantAtt
 #### 4.5.12 Gameplay Effect Execution Calculation
 [`GameplayEffectExecutionCalculations`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectExecutionCalculat-/index.html) (`ExecutionCalculation`, `Execution` (you will often see this term in the plugin's source code), or `ExecCalc`) are the most powerful way for `GameplayEffects` to make changes to an `ASC`. Like [`ModifierMagnitudeCalculations`](#concepts-ge-mmc), these can capture `Attributes` and optionally snapshot them. Unlike `MMCs`, these can change more than one `Attribute` and essentially do anything else that the programmer wants. The downside to this power and flexibility is that they can not be [predicted](#concepts-p) and they must be implemented in C++.
 
+<!--cn-->
+[`GameplayEffectExecutionCalculation`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectExecutionCalculat-/index.html)(`ExecutionCalculation`, `Execution`（您通常会在插件的源代码中看到此术语）, 或者 `ExecCalc`)是`游戏效果`修改`ASC`最强大的方式。像[`ModifierMagnitudeCalculation`](#concepts-ge-mmc)一样，这些可以捕捉`属性`并可以选择对它们快照。与`MMC`不同的是，它可以改变不止一个`属性`，本质上来说可以做任何程序员想要的事情。这种灵活而强大的代价是它们不能被[预测](#concepts-p)，并且必须在C++中实现。
+<!--/cn-->
+
 `ExecutionCalculations` can only be used with `Instant` and `Periodic` `GameplayEffects`. Anything with the word 'Execute' in it typically refers to these two types of `GameplayEffects`.
 
+<!--cn-->
+`ExecutionCalculation`只能与`即时`和`周期`型 `游戏效果`一起使用。任何包含“Execute”一词的通常指的是这两种类型的`游戏效果`。
+<!--/cn-->
+
 Snapshotting captures the `Attribute` when the `GameplayEffectSpec` is created whereas not snapshotting captures the `Attribute` when the `GameplayEffectSpec` is applied. Capturing `Attributes` recalculates their `CurrentValue` from existing mods on the `ASC`. This recalculation will **not** run [`PreAttributeChange()`](#concepts-as-preattributechange) in the `AbilitySet` so any clamping must be done here again.
+
+<!--cn-->
+`GameplayEffectSpec`创建时快照会捕获`属性`，而应用时不会捕获。捕获`属性`会根据现有的`ASC`重新计算它们的`当前值`。这个重新计算**不会**在`AbilitySet`中触发[`PreAttributeChange()`](#concepts-as-preattributechange)，所以任何限制必须在这里再次完成。
+<!--/cn-->
 
 | Snapshot | Source or Target | Captured on `GameplayEffectSpec` |
 | -------- | ---------------- | -------------------------------- |
@@ -1344,19 +1356,39 @@ Snapshotting captures the `Attribute` when the `GameplayEffectSpec` is created w
 
 To set up `Attribute` capture, we follow a pattern set by Epic's ActionRPG Sample Project by defining a struct holding and defining how we capture the `Attributes` and creating one copy of it in the struct's constructor. You will have a struct like this for every `ExecCalc`. **Note:** Each struct needs a unique name as they share the same namespace. Using the same name for the structs will cause incorrect behavior in capturing your `Attributes` (mostly capturing the values of the wrong `Attributes`).
 
+<!--cn-->
+为了捕获`属性`，我们遵循 Epic 的 ActionRPG 示例项目的设置模式，定义一个结构体持有并定义如何捕获`属性`，并在这个结构的构造函数中创建一个副本。对于每个`ExecCalc`，设置一个这样的结构体，**注意：**每个结构体需要一个唯一的名称，因为它们共享相同的命名空间。结构体重名将导致捕获`属性`过程中发生行为错误（主要是捕获了错误的`属性`值）。
+<!--/cn-->
+
 For `Local Predicted`, `Server Only`, and `Server Initiated` [`GameplayAbilities`](#concepts-ga), the `ExecCalc` only calls on the Server.
 
+<!--cn-->
+对于`Local Predicted`、`Server Only`和`Server Initiated` 的[`技能`](#concepts-ga)，`ExecCalc`只会在服务器上调用。
+<!--/cn-->
+
 Calculating damage received based on a complex formula reading from many attributes on the `Source` and the `Target` is the most common example of an `ExecCalc`. The included Sample Project has a simple `ExecCalc` for calculating damage that reads the value of damage from the `GameplayEffectSpec's` [`SetByCaller`](#concepts-ge-spec-setbycaller) and then mitigates that value based on the armor `Attribute` captured from the `Target`. See `GDDamageExecCalculation.cpp/.h`.
+
+<!--cn-->
+`ExecCalc`最常见的的例子是，从`源`和`目标`上读取许多`属性`，以复杂公式计算受到的伤害。包含的示例项目中有一个简单的`ExecCalc`，用于计算从`GameplayEffectSpec`的[`SetByCaller`](#concepts-ge-spec-setbycaller)读取伤害值，然后根据从`目标`捕获的`属性`减去该值。请参阅`GDDamageExecCalculation.cpp/.h`。
+<!--/cn-->
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-ec-senddata"></a>
-##### 4.5.12.1 Sending Data to Execution Calculations
+##### 4.5.12.1 向`ExecutionCalculation`发送数据
 There are a few ways to send data to an `ExecutionCalculation` in addition to capturing `Attributes`.
+
+<!--cn-->
+除了捕获`属性`之外，还有几种方法可以向`ExecutionCalculation`发送数据。
+<!--/cn-->
 
 <a name="concepts-ge-ec-senddata-setbycaller"></a>
 ###### 4.5.12.1.1 SetByCaller
 Any [`SetByCallers` set on the `GameplayEffectSpec`](#concepts-ge-spec-setbycaller) can be directly read in the `ExecutionCalculation`.
+
+<!--cn-->
+任何[`SetByCaller`](#concepts-ge-spec-setbycaller)都可以直接在`ExecutionCalculation`中读取。
+<!--/cn-->
 
 ```c++
 const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
@@ -1365,9 +1397,17 @@ float Damage = FMath::Max<float>(Spec.GetSetByCallerMagnitude(FGameplayTag::Requ
 
 <a name="concepts-ge-ec-senddata-backingdataattribute"></a>
 ###### 4.5.12.1.2 Backing Data Attribute Calculation Modifier
+###### 4.5.12.1.2 后备数据属性计算修改器
 If you want to hardcode values to a `GameplayEffect`, you can pass them in using a `CalculationModifier` that uses one of the captured `Attributes` as the backing data.
 
+<!--cn-->
+如果你想让一个`游戏效果`使用硬编码值，你可以使用一个以捕获的`属性`作为后备数据的`CalculationModifier`。
+<!--/cn-->
+
 In this screenshot example, we're adding 50 to the captured Damage `Attribute`. You could also set this to `Override` to just take in only the hardcoded value.
+<!--cn-->
+在下面的截图例子中，我们给捕获的Damage`属性`加50。你也可以设置这个为`Override`，只接受硬编码值。
+<!--/cn-->
 
 ![Backing Data Attribute Calculation Modifier](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/calculationmodifierbackingdataattribute.png)
 
@@ -1388,12 +1428,18 @@ In this screenshot example, we're adding 50 to a `Temporary Variable` using the 
 ![Backing Data Temporary Variable Calculation Modifier](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/calculationmodifierbackingdatatempvariable.png)
 
 Add backing `Temporary Variables` to your `ExecutionCalculation`'s constructor:
+<!--cn-->
+在`ExecutionCalculation`的构造函数里添加`Temporary Variables`：
+<!--/cn-->
 
 ```c++
 ValidTransientAggregatorIdentifiers.AddTag(FGameplayTag::RequestGameplayTag("Data.Damage"));
 ```
 
 The `ExecutionCalculation` reads this value in using special capture functions similar to the `Attribute` capture functions.
+<!--cn-->
+`ExecutionCalculation`使用特殊的捕获函数读取这个值，类似于`属性`捕获函数。
+<!--/cn-->
 
 ```c++
 float Damage = 0.0f;
@@ -1401,10 +1447,16 @@ ExecutionParams.AttemptCalculateTransientAggregatorMagnitude(FGameplayTag::Reque
 ```
 
 <a name="concepts-ge-ec-senddata-effectcontext"></a>
-###### 4.5.12.1.4 Gameplay Effect Context
+###### 4.5.12.1.4 游戏效果上下文 / Gameplay Effect Context
 You can send data to the `ExecutionCalculation` via a custom [`GameplayEffectContext` on the `GameplayEffectSpec`](#concepts-ge-context).
+<!--cn-->
+可以通过[`GameplayEffectSpec`上的自定义`GameplayEffectContext`](#concepts-ge-context)发送数据到`ExecutionCalculation`。
+<!--/cn-->
 
 In the `ExecutionCalculation` you can access the `EffectContext` from the `FGameplayEffectCustomExecutionParameters`.
+<!--cn-->
+在`ExecutionCalculation`中，你可以从`FGameplayEffectCustomExecutionParameters`访问`EffectContext`。
+<!--/cn-->
 
 ```c++
 const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
@@ -1412,6 +1464,9 @@ FGSGameplayEffectContext* ContextHandle = static_cast<FGSGameplayEffectContext*>
 ```
 
 If you need change something on the `GameplayEffectSpec` or the `EffectContext`:
+<!--cn-->
+如果需要修改`GameplayEffectSpec`或`EffectContext`：
+<!--/cn-->
 
 ```c++
 FGameplayEffectSpec* MutableSpec = ExecutionParams.GetOwningSpecForPreExecuteMod();
@@ -1419,6 +1474,11 @@ FGSGameplayEffectContext* ContextHandle = static_cast<FGSGameplayEffectContext*>
 ```
 
 Use caution if modifying the `GameplayEffectSpec` in the `ExecutionCalculation`. See the comment for `GetOwningSpecForPreExecuteMod()`.
+
+<!--cn-->
+在`ExecutionCalculation`中修改`GameplayEffectSpec`时要小心。请参阅`GetOwningSpecForPreExecuteMod()`的注释。
+<!--/cn-->
+
 
 ```c++
 /** Non const access. Be careful with this, especially when modifying a spec after attribute capture. */
@@ -1428,26 +1488,52 @@ FGameplayEffectSpec* GetOwningSpecForPreExecuteMod() const;
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-car"></a>
-#### 4.5.13 Custom Application Requirement
+#### 4.5.13 自定义应用要求
 [`CustomApplicationRequirement`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectCustomApplication-/index.html) (`CAR`) classes give the designers advanced control over whether a `GameplayEffect` can be applied versus the simple `GameplayTag` checks on the `GameplayEffect`. These can be implemented in Blueprint by overriding `CanApplyGameplayEffect()` and in C++ by overriding `CanApplyGameplayEffect_Implementation()`.
+
+<!--cn-->
+[`CustomApplicationRequirement`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectCustomApplication-/index.html) (`CAR`) 类允许设计师对 `GameplayEffect` 能否被应用进行高级控制。这些可以在蓝图中通过重写 `CanApplyGameplayEffect()` 实现，也可以在 C++ 中通过重写 `CanApplyGameplayEffect_Implementation()` 实现。
+<!--/cn-->
 
 Examples of when to use `CARs`:
 * `Target` needs to have a certain amount of an `Attribute`
 * `Target` needs to have a certain number of stacks of a `GameplayEffect`
 
+<!--cn-->
+使用 `CAR` 的例子：
+* `目标` 需要某`属性`达到一定值
+* `目标` 需要某`游戏效果`的堆叠数达到一定值
+<!--/cn-->
+
 `CARs` can also do more advanced things like checking if an instance of this `GameplayEffect` is already on the `Target` and [changing the duration](#concepts-ge-duration) of the existing instance instead of applying a new instance (return false for `CanApplyGameplayEffect()`).
+<!--cn-->
+`CAR`也能做更高级的事情，比如检查`目标`上是否已经存在该`游戏效果`的实例，如果存在则修改该实例的持续时间而不应用新的实例（在`CanApplyGameplayEffect()`中返回false）。
+<!--/cn-->
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-cost"></a>
-#### 4.5.14 Cost Gameplay Effect
+#### 4.5.14 消耗性技能效果 / Cost Gameplay Effect
 [`GameplayAbilities`](#concepts-ga) have an optional `GameplayEffect` specifically designed to use as the cost of the ability. Costs are how much of an `Attribute` an `ASC` needs to have to be able to activate the `GameplayAbility`. If a `GA` cannot afford the `Cost GE`, then they will not be able to activate. This `Cost GE` should be an `Instant` `GameplayEffect` with one or more `Modifiers` that subtract from `Attributes`. By default, `Cost GEs` are meant to be predicted and it is recommended to maintain that capability meaning do not use `ExecutionCalculations`. `MMCs` are perfectly acceptable and encouraged for complex cost calculations.
+<!--cn-->
+[`游戏技能`](#concepts-ga)有可选的`游戏效果`，专门用于技能的消耗。消耗的含义是`ASC`需要`属性`值达到多少才能激活`游戏技能`。如果`GA`无法负担`消耗性GE`的消耗，那么就无法激活。这个`消耗性GE`应该是一个`即时`的`游戏效果`，带有一个或多个`修改器`，用来从`属性`中减掉值。默认情况下，`消耗性GE`应该可以被预测，建议保持这种能力，这也就意味着尽量不要使用`ExecutionCalculation`。`MMC`完美符合要求，所以建议将其用于计算较复杂的消耗。
+<!--/cn-->
 
 When starting out, you will most likely have one unique `Cost GE` per `GA` that has a cost. A more advanced technique is to reuse one `Cost GE` for multiple `GAs` and just modify the `GameplayEffectSpec` created from the `Cost GE` with the `GA`-specific data (the cost value is defined on the `GA`). **This only works for `Instanced` abilities.**
+<!--cn-->
+刚开始的时候，你可能会为每个`技能`创建一个唯一的`消耗性GE`。更高级的技巧是，复用一个`消耗性GE`来为多个`技能`服务，并使用`技能`特定的数据来修改`消耗性GE`创建的`GameplayEffectSpec`（消耗值是在`技能`上定义的）。**这个方法只适用于`实例化`的技能。**
+<!--/cn-->
 
 Two techniques for reusing the `Cost GE`:
+<!--cn-->
+复用`消耗性GE`的两种方法：
+<!--/cn-->
 
 1. **Use an `MMC`.** This is the easiest method. Create an [`MMC`](#concepts-ge-mmc) that reads the cost value from the `GameplayAbility` instance which you can get from the `GameplayEffectSpec`.
+
+<!--cn-->
+1. **使用`MMC`。**这是最简单的方法。创建一个[`MMC`](#concepts-ge-mmc)，从`GameplayEffectSpec`中获取`游戏技能`的实例，再从技能实例获取消耗值。
+<!--/cn-->
 
 ```c++
 float UPGMMC_HeroAbilityCost::CalculateBaseMagnitude_Implementation(const FGameplayEffectSpec & Spec) const
@@ -1464,6 +1550,10 @@ float UPGMMC_HeroAbilityCost::CalculateBaseMagnitude_Implementation(const FGamep
 ```
 
 In this example the cost value is an `FScalableFloat` on the `GameplayAbility` child class that I added to it.
+<!--cn-->
+在这个例子中，消耗值是一个`FScalableFloat`，它被添加到`GameplayAbility`的子类中。
+<!--/cn-->
+
 ```c++
 UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cost")
 FScalableFloat Cost;
@@ -1472,18 +1562,35 @@ FScalableFloat Cost;
 ![Cost GE With MMC](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/costmmc.png)
 
 2. **Override `UGameplayAbility::GetCostGameplayEffect()`.** Override this function and [create a `GameplayEffect` at runtime](#concepts-ge-dynamic) that reads the cost value on the `GameplayAbility`.
+<!--cn-->
+2. **重写`UGameplayAbility::GetCostGameplayEffect()`。** 重写这个函数，并在运行时创建一个消耗性的[`GameplayEffect`](#concepts-ge)，它读取`GameplayAbility`上的消耗值。
+<!--/cn-->
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-cooldown"></a>
-#### 4.5.15 Cooldown Gameplay Effect
+#### 4.5.15 冷却性游戏效果
 [`GameplayAbilities`](#concepts-ga) have an optional `GameplayEffect` specifically designed to use as the cooldown of the ability. Cooldowns determine how long after activation the ability can be activated again. If a `GA` is still on cooldown, it cannot activate. This `Cooldown GE` should be a `Duration` `GameplayEffect` with no `Modifiers` and a unique `GameplayTag` per `GameplayAbility` or per ability slot (if your game has interchangeable abilities assigned to slots that share a cooldown) in the `GameplayEffect's` `GrantedTags` ("`Cooldown Tag`"). The `GA` actually checks for the presence of the `Cooldown Tag` instead of the presence of the `Cooldown GE`. By default, `Cooldown GEs` are meant to be predicted and it is recommended to maintain that capability meaning do not use `ExecutionCalculations`. `MMCs` are perfectly acceptable and encouraged for complex cooldown calculations.
 
+<!--cn-->
+[`游戏技能`](#concepts-ga) 有一个可选的 `游戏效果`，专门用于作为技能的冷却。 冷却确定在激活后该技能可以再次激活的间隔时间。 如果一个`游戏技能`仍在冷却中，它就不能激活。 这个`冷却性游戏效果`应该是一个没有 `修改器` 的 `持续性` `游戏效果`，每个 `游戏技能` 或每个技能槽（如果你的游戏有共享冷却的互换技能分配给槽位）在 `游戏效果` 的 `GrantedTag` 中有一个唯一的 `游戏标签`（“`Cooldown 标签`”）。 `GA` 实际上检查的是 `Cooldown 标签` 而不是 `冷却性游戏效果` 。 默认情况下，`冷却性游戏效果`应该可以被预测，建议保持这种能力，这也就意味着尽量不要使用`ExecutionCalculation`。`MMC`完美符合要求，所以建议将其用于计算较复杂的冷却。
+<!--/cn-->
+
 When starting out, you will most likely have one unique `Cooldown GE` per `GA` that has a cooldown. A more advanced technique is to reuse one `Cooldown GE` for multiple `GAs` and just modify the `GameplayEffectSpec` created from the `Cooldown GE` with the `GA`-specific data (the cooldown duration and the `Cooldown Tag` are defined on the `GA`). **This only works for `Instanced` abilities.**
+<!--cn-->
+刚开始的时候，你可能会为每个`技能`创建一个唯一的`冷却性游戏效果`。更高级的技巧是，复用一个`冷却性游戏效果`来为多个`技能`服务，并使用`技能`特定的数据来修改`冷却性游戏效果`创建的`GameplayEffectSpec`（冷却时间是在`技能`上定义的）。**这个方法只适用于`实例化`的技能。**
+<!--/cn-->
 
 Two techniques for reusing the `Cooldown GE`:
+<!--cn-->
+复用`冷却性游戏效果`的两种方法：
+<!--/cn-->
 
 1. **Use a [`SetByCaller`](#concepts-ge-spec-setbycaller).** This is the easiest method. Set the duration of your shared `Cooldown GE` to `SetByCaller` with a `GameplayTag`. On your `GameplayAbility` subclass, define a float / `FScalableFloat` for the duration, a `FGameplayTagContainer` for the unique `Cooldown Tag`, and a temporary `FGameplayTagContainer` that we will use as the return pointer of the union of our `Cooldown Tag` and the `Cooldown GE's` tags.
+<!--cn-->
+1. **使用[`SetByCaller`](#concepts-ge-spec-setbycaller)。** 这是最简单的方法。将共享的`冷却性游戏效果`的持续时间设置到带有`标签`的`SetByCaller`。在你的`游戏技能`的子类中，定义一个用于持续时间的浮点数/`FScalableFloat`，一个用于唯一`冷却标签`的`FGameplayTagContainer`，以及一个临时的`FGameplayTagContainer`，它将作为`冷却标签`和`冷却性游戏效果`的标签的并集的返回指针。
+<!--/cn-->
+
 ```c++
 UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown")
 FScalableFloat CooldownDuration;
