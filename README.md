@@ -725,7 +725,7 @@ AttributeSet->InitHealth(100.0f);
 
 有关初始化`属性`的更多方法，请参阅 `AttributeSet.h`。
 
-**注意：**在 4.24 之前，`FAttributeSetInitterDiscreteLevels` 无法与 `FGameplayAttributeData` 配合使用。它是为原始浮点数属性创建的，并且会抱错 `FGameplayAttributeData` 不是普通旧数据 (`Plain Old Data`，POD)。这一问题已在 4.24 https://issues.unrealengine.com/issue/UE-76557 中得到修复。
+**注意：**在 4.24 之前，`FAttributeSetInitterDiscreteLevels` 无法与 `FGameplayAttributeData` 配合使用。它是为原始浮点数属性创建的，并且会报错 `FGameplayAttributeData` 不是普通旧数据 (`Plain Old Data`，POD)。这一问题已在 4.24 https://issues.unrealengine.com/issue/UE-76557 中得到修复。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
@@ -872,8 +872,14 @@ virtual void OnRemoveGameplayEffectCallback(const FActiveGameplayEffect& EffectR
 
 <a name="concepts-ge-mods"></a>
 #### 4.5.4 游戏效果修改器
+
+<!--en-->  
 `Modifiers` change an `Attribute` and are the only way to [predictively](#concepts-p) change an `Attribute`. A `GameplayEffect` can have zero or many `Modifiers`. Each `Modifier` is responsible for changing only one `Attribute` via a specified operation.  
+<!--/en-->  
+
+<!--cn-->  
 `修改器` 负责修改 `属性` ，并且是唯一能[预测](#concepts-p)`属性`修改的方式。`游戏效果` 可以有零个或多个 `修改器`。每个 `修改器` 负责通过指定的操作仅更改一个 `属性`。  
+<!--/cn-->  
 
 | Operation/操作  | Description/描述                                                                                                         |
 | ---------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -882,22 +888,34 @@ virtual void OnRemoveGameplayEffectCallback(const FActiveGameplayEffect& EffectR
 | `Divide`   | Divides the result against the `Modifier's` specified `Attribute`. <br> 将结果与`修改器`指定的`属性`相除。                                                 |
 | `Override` | Overrides the `Modifier's` specified `Attribute` with the result.<br>用结果覆盖`修改器`指定的`属性`。                                                  |
 
+<!--en-->  
 The `CurrentValue` of an `Attribute` is the aggregate result of all of its `Modifiers` added to its `BaseValue`. The formula for how `Modifiers` are aggregated is defined as follows in `FAggregatorModChannel::EvaluateWithBase` in `GameplayEffectAggregator.cpp`:  
+<!--/en-->  
+
 `修改器` 的 `当前值` 是所有 `修改器` 添加到 `基础值` 的总和。`修改器` 聚合的公式定义在 `GameplayEffectAggregator.cpp` 中的 `FAggregatorModChannel::EvaluateWithBase` 中：  
 ```c++
 ((InlineBaseValue + Additive) * Multiplicitive) / Division
 ```
  
+<!--en-->  
 Any `Override` `Modifiers` will override the final value with the last applied `Modifier` taking precedence.  
+<!--/en-->  
+
 任何`Override` `修改器`都会覆盖`修改器`的最终值，最终值取决于最后一个`修改器`。 
 
+<!--en-->  
 **Note:** For percentage based changes, make sure to use the `Multiply` operation so that it happens after addition.  
+<!--/en-->  
+
 **注意：** 对于百分比修改的`修改器`，请使用`Multiply`，以便在添加后起作用。  
 
 **Note:** [Prediction](#concepts-p) has trouble with percentage changes.  
 **注意：** [预测](#concepts-p) 难以处理百分比变化。  
 
+<!--en-->  
 There are four types of `Modifiers`: Scalable Float, Attribute Based, Custom Calculation Class, and Set By Caller. They all generate some float value that is then used to change the specified `Attribute` of the `Modifier` based on its operation.  
+<!--/en-->  
+
 `修改器`有四种类型：可缩放浮点数、基于属性的、自定义计算类和由调用者设置的。它们都生成一些浮点值，然后使用它们的操作来改变`修改器`指定的`属性`。  
 
 | `Modifier` Type/`修改器`类型            | Description/描述                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -911,7 +929,9 @@ There are four types of `Modifiers`: Scalable Float, Attribute Based, Custom Cal
 
 <a name="concepts-ge-mods-multiplydivide"></a>
 ##### 4.5.4.1 乘法和除法修改器
+<!--en-->  
 By default, all `Multiply` and `Divide` `Modifiers` are added together before multiplying or dividing them into the `Attribute`'s `BaseValue`.  
+<!--/en-->  
 默认情况下，所有 `乘法` 和 `除法` `修改器` 都先求和，然后再乘以或除以它们。
 
 
@@ -946,39 +966,62 @@ float FAggregatorModChannel::SumMods(const TArray<FAggregatorMod>& InMods, float
 ```
 *from `GameplayEffectAggregator.cpp`*
 
-Both `Multiply` and `Divide` `Modifiers` have a `Bias` value of `1` in this formula (`Addition` has a `Bias` of `0`). So it would look something like:  
+<!--en-->  
+Both `Multiply` and `Divide` `Modifiers` have a `Bias` value of `1` in this formula (`Addition` has a `Bias` of `0`). So it would look something like: 
+<!--/en-->   
 对于`乘法`和`除法` `修改器`，这个公式中的`偏移`值为`1`——`加法修改器`的`偏移值`是`0`。所以它看起来像这样：  
 
 ```
 1 + (Mod1.Magnitude - 1) + (Mod2.Magnitude - 1) + ...
 ```
 
+<!--en-->  
 This formula leads to some unexpected results. Firstly, this formula adds all the modifiers together before multiplying or dividing them into the `BaseValue`. Most people would expect it to multiply or divide them together. For example, if you have two `Multiply` modifiers of `1.5`, most people would expect the `BaseValue` to be multiplied by `1.5 x 1.5 = 2.25`. Instead, this adds the `1.5`s together to multiply the `BaseValue` by `2` (`50% increase + another 50% increase = 100% increase`). This was for the example from `GameplayPrediction.h` of a `10%` speed buff on `500` base speed would be `550`. Add another `10%` speed buff and it will be `600`.  
+<!--/en-->  
 这个公式导致了一些意想不到的结果。首先，这个公式将所有修改器加在一起，然后再将它们相乘或除以`基础值`。有些人以为它们应该连续相乘或相除。例如，如果你有两个`乘法`修改器值是`1.5`，有些人会以为`基础值`乘以`1.5 x 1.5 = 2.25`。相反，这个公式将`1.5`相加，再乘以`基础值`的`2`（`50% 增长 + 50% 增长 = 100% 增长`）。这是来自`GameplayPrediction.h`的例子：把`10%`速度增益增加到在`500`基础速度上，结果是`550`。如果再加一个`10%`速度增益，结果将是`600`。
 
+<!--en-->  
 Secondly, this formula has some undocumented rules about what values can be used as it was designed with Paragon in mind.  
+<!--/en-->  
 其次，这个公式在设计时考虑到了 Paragon，因此对于可以使用哪些值有一些未记录的规则。
 
+<!--en-->  
 Rules for `Multiply` and `Divide` multiplication addition formula:
 * `(No more than one value < 1) AND (Any number of values [1, 2))`
 * `OR (One value >= 2)`
+<!--/en-->  
 
 `乘法`和`除法`叠加公式的规则：  
 * `（不超过一个值 < 1）AND（任意多个值 [1, 2)）`  
 * `OR (一个值 >= 2)`  
 
+<!--en-->  
 The `Bias` in the formula basically subtracts out the integer digit of numbers in the range `[1, 2)`. The first `Modifier`'s `Bias` subtracts out from the starting `Sum` value (set to the `Bias` before the loop) which is why any value by itself works and why one value `< 1` will work with the numbers in the range `[1, 2)`.  
+<!--/en-->  
 公式中的`Bias`基本上是减去范围`[1, 2) `内数字的整数位数。第一个`修改器`的`偏移值`是从起始的`和`值（循环前设置的`偏移值`）中减去的，这就是为什么任何值都可以工作，以及为什么一个值`< 1`可以与范围`[1, 2)`中的数字一起工作。
 
+<!--en--> 
 Some examples with `Multiply`:  
-`乘法`的一些例子：
 Multipliers: `0.5`
-乘数：`0.5`  
 `1 + (0.5 - 1) = 0.5`, 正确
 
 乘数：`0.5, 0.5`  
 `1 + (0.5 - 1) + (0.5 - 1) = 0`, incorrect expected `1`? Multiple values less than `1` don't make sense for adding multipliers. Paragon was designed to only use the [greatest negative value for `Multiply` `Modifiers`](#cae-nonstackingge) so there would only ever be at most one value less than `1` multiplying into the `BaseValue`.  
-`1 + (0.5 - 1) + (0.5 - 1) = 0`, 错误地预期`1`？小于 `1` 的倍数值对乘数叠加没有意义。Paragon 的设计是只使用[最大负值用于`乘法``修改器``](#cae-nonstackingge)，因此最多只有一个小于`1`的值乘入`BaseValue`。
+
+乘数：`1.1, 0.5`  
+`1 + (0.5 - 1) + (1.1 - 1) = 0.6`, 正确
+
+乘数：`5, 5`  
+`1 + (5 - 1) + (5 - 1) = 9`, `10`是错误的. 答案永远是 `乘数的和 - 修改器的个数 + 1`.
+<!--/en--> 
+
+`乘法`的一些例子：
+
+乘数：`0.5`  
+`1 + (0.5 - 1) = 0.5`, 正确
+
+乘数：`0.5, 0.5` 
+`1 + (0.5 - 1) + (0.5 - 1) = 0`, 预期得到`1`是错误的？小于 `1` 的倍数值对乘数叠加没有意义。Paragon 的设计是只使用[最大负值用于`乘法``修改器``](#cae-nonstackingge)，因此最多只有一个小于`1`的值乘入`基础值`。
 
 乘数：`1.1, 0.5`  
 `1 + (0.5 - 1) + (1.1 - 1) = 0.6`, 正确
@@ -987,7 +1030,9 @@ Multipliers: `0.5`
 `1 + (5 - 1) + (5 - 1) = 9`, `10`是错误的. 答案永远是 `乘数的和 - 修改器的个数 + 1`.
 
 
+<!--en--> 
 Many games will want their `Multiply` and `Divide` `Modifiers` to multiply and divide together before applying to the `BaseValue`. To achieve this, you will need to **change the engine code** for `FAggregatorModChannel::EvaluateWithBase()`.  
+<!--/en--> 
 许多游戏希望他们的`乘法`和`除法``修改器`在应用到`基础值`之前连乘或连除到一起。为了实现这个目标，您将需要**更改引擎代码**，位置在`FAggregatorModChannel::EvaluateWithBase()`。
 
 ```c++
@@ -1024,25 +1069,42 @@ float FAggregatorModChannel::MultiplyMods(const TArray<FAggregatorMod>& InMods, 
 <a name="concepts-ge-mods-gameplaytags"></a>
 ##### 4.5.4.2 修改器的游戏内标签
 
+
+<!--en--> 
 `SourceTags` and `TargetTags` can be set for each [Modifier](#concepts-ge-mods). They work the same like the [`Application Tag requirements`](#concepts-ge-tags) of a `GameplayEffect`. So the tags are considered only when the effect is applied. I.e. when having a periodic, infinite effect, they are only taken into consideration on the first application of the effect but *not* on each periodic execution.  
+<!--/en--> 
 可以为每个[修改器](#concepts-ge-mods)设置`源标签`（SourceTags）和 `目标标签`（TargetTags）。它们的作用与`游戏效果`的[应用标签要求](#concepts-ge-tags) 相同。因此，只有在应用效果时才会考虑这些标签。也就是说，当有一个周期性的无限效果时，只有在第一次应用该效果时才会考虑这些标签，而不是在每次周期性执行时。
 
+
+<!--en--> 
 `Attribute Based` Modifiers can also set `SourceTagFilter` and `TargetTagFilter`. When determining the magnitude of the attribute which is the source of the `Attribute Based` Modifier, these filters are used to exclude certain Modifiers to that attribute. Modifiers which source or target didn't have all of the tags of the filter are excluded.  
+<!--/en--> 
 `Attribute Based`修改器也可以设置`源标签过滤器`和`目标标签过滤器`。在确定`Attribute Based`修改器的属性作为源的属性时，这些过滤器用于排除某些修改器到该属性。如果修改器没有包含过滤器中的所有标签，则会被排除。
 
+
+<!--en--> 
 This means in detail: The tags of the source ASC and the target ASC are captured by `GameplayEffects`. The source ASC tags are captured, when the `GameplayEffectSpec` is created, the target ASC tags are captured on execution of the effect. When determining, if a Modifier of an infinite or duration effect "qualifies" to be applied (i.e. its Aggregator qualifies) and those filters are set, the captured tags are compared against the filters.  
+<!--/en--> 
 具体来说：`游戏效果`捕获源ASC和目标ASC的标签。当`GameplayEffectSpec`创建时，捕获源ASC的标签，当效果被执行时，捕获目标ASC的标签。在确定无限效果或持续效果的修改器是否 "有资格" 应用（即其聚合器有资格）以及这些过滤器是否已设置时，会将捕获的标记与过滤器进行比较。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-stacking"></a>
+<!--en--> 
 #### 4.5.5 Stacking Gameplay Effects
+<!--/en--> 
 #### 4.5.5 堆叠游戏效果
+
+<!--en--> 
 `GameplayEffects` by default will apply new instances of the `GameplayEffectSpec` that don't know or care about previously existing instances of the `GameplayEffectSpec` on application. `GameplayEffects` can be set to stack where instead of a new instance of the `GameplayEffectSpec` is added, the currently existing `GameplayEffectSpec's` stack count is changed. Stacking only works for `Duration` and `Infinite` `GameplayEffects`.
+<!--/en--> 
 
 默认情况下，`游戏效果`将应用`GameplayEffectSpec`的新实例，这些实例不知道也不关心以前存在的`GameplayEffectSpec`实例。`游戏效果`可以设置为堆叠，在这种情况下，不会添加`GameplayEffectSpec`的新实例，而是更改当前存在的`GameplayEffectSpec`的堆叠计数。堆叠仅适用于`持续`和`无限`的`游戏效果`。
 
+
+<!--en--> 
 There are two types of stacking: Aggregate by Source and Aggregate by Target.
+<!--/en--> 
 
 有两种类型的堆叠：按源聚合和按目标聚合。
 
@@ -1063,13 +1125,20 @@ The Sample Project includes a custom Blueprint node that listens for `GameplayEf
 
 <a name="concepts-ge-ga"></a>
 #### 4.5.6 授予技能
-`GameplayEffects` can grant new [`GameplayAbilities`](#concepts-ga) to `ASCs`. Only `Duration` and `Infinite` `GameplayEffects` can grant abilities.
-`游戏效果` 可以授予新的 [`游戏技能`](#concepts-ga) 到 `ASCs`。只有 `持续` 和 `无限` `游戏效果` 可以授予技能。
 
+<!--en--> 
+`GameplayEffects` can grant new [`GameplayAbilities`](#concepts-ga) to `ASCs`. Only `Duration` and `Infinite` `GameplayEffects` can grant abilities.
+<!--/en--> 
+`游戏效果` 可以授予新的 [`游戏技能`](#concepts-ga) 到 `ASC`。只有 `持续` 和 `无限` `游戏效果` 可以授予技能。
+
+<!--en--> 
 A common usecase for this is when you want to force another player to do something like moving them from a knockback or pull. You would apply a `GameplayEffect` to them that grants them an automatically activating ability (see [Passive Abilities](#concepts-ga-activating-passive) for how to automatically activate an ability when it is granted) that does the desired action to them.
+<!--/en--> 
 常见的用例是当你想要强制另一个玩家做某事，比如强制击退或拉动玩家。你会给他们应用一个 `游戏效果`，授予他们一个自动激活的技能（见 [被动技能](#concepts-ga-activating-passive) 了解如何自动激活授予的技能）。
 
+<!--en--> 
 Designers can choose which abilities a `GameplayEffect` grants, what level to grant them at, what [input to bind](#concepts-ga-input) them at and the removal policy for the granted ability.
+<!--/en--> 
 设计师可以配置 `游戏效果` 可以授予哪些技能，技能的等级，以及输入的方式，以及所授予技能的移除策略。
 
 | Removal Policy / 移除策略             | Description / 描述                                                                                                                                                                     |
@@ -1082,16 +1151,11 @@ Designers can choose which abilities a `GameplayEffect` grants, what level to gr
 
 <a name="concepts-ge-tags"></a>
 #### 4.5.7 游戏效果标签
+<!--en--> 
 `GameplayEffects` carry multiple [`GameplayTagContainers`](#concepts-gt). Designers will edit the `Added` and `Removed` `GameplayTagContainers` for each category and the result will show up in the `Combined` `GameplayTagContainer` on compilation. `Added` tags are new tags that this `GameplayEffect` adds that its parents did not previously have. `Removed` tags are tags that parent classes have but this subclass does not have.  
+<!--/en--> 
 `游戏效果` 有多个 [`GameplayTagContainer`](#concepts-gt). 设计者将为每个类别编辑 `Added` 和 `Removed` `GameplayTagContainer`，编译后的结果将显示在 `Combined` `GameplayTagContainer` 上。 `Added` 标签是这个 `GameplayEffect` 添加的新标签，而且其父类之前没有这些标签。 `Removed` 标签是父类具有但这个子类不具有的标签。
 
-| Category                          | Description                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gameplay Effect Asset Tags        | Tags that the `GameplayEffect` has. They do not do any function on their own and serve only the purpose of describing the `GameplayEffect`.                                                                                                                                                                                                                                        |
-| Granted Tags                      | Tags that live on the `GameplayEffect` but are also given to the `ASC` that the `GameplayEffect` is applied to. They are removed from the `ASC` when the `GameplayEffect` is removed. This only works for `Duration` and `Infinite` `GameplayEffects`.                                                                                                                             |
-| Ongoing Tag Requirements          | Once applied, these tags determine whether the `GameplayEffect` is on or off. A `GameplayEffect` can be off and still be applied. If a `GameplayEffect` is off due to failing the Ongoing Tag Requirements, but the requirements are then met, the `GameplayEffect` will turn on again and reapply its modifiers. This only works for `Duration` and `Infinite` `GameplayEffects`. |
-| Application Tag Requirements      | Tags on the Target that determine if a `GameplayEffect` can be applied to the Target. If these requirements are not met, the `GameplayEffect` is not applied.                                                                                                                                                                                                                      |
-| Remove Gameplay Effects with Tags | `GameplayEffects` on the Target that have any of these tags in their `Asset Tags` or `Granted Tags` will be removed from the Target when this `GameplayEffect` is successfully applied.            
 
 | 类别                          | 描述                                                                                                                                                                                                                                                                                                                                                                        |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1105,29 +1169,42 @@ Designers can choose which abilities a `GameplayEffect` grants, what level to gr
 
 <a name="concepts-ge-immunity"></a>
 #### 4.5.8 免疫 / Immunity
+<!--en--> 
 `GameplayEffects` can grant immunity, effectively blocking the application of other `GameplayEffects`, based on [`GameplayTags`](#concepts-gt). While immunity can be effectively achieved through other means like `Application Tag Requirements`, using this system provides a delegate for when `GameplayEffects` are blocked due to immunity `UAbilitySystemComponent::OnImmunityBlockGameplayEffectDelegate`.  
+<!--/en--> 
 `游戏效果`可以带有免疫功能，从而有效地阻止其他`游戏效果`的应用，基于[`游戏标签`](#concepts-gt)。虽然免疫可以通过其他方式实现，比如通过`应用要求标签（Application Tag Requirements）`的方法，但免疫系统提供了一个委托，当游戏效果由于免疫被阻止时会触发`UAbilitySystemComponent::OnImmunityBlockGameplayEffectDelegate`。
 
 
+<!--en--> 
 `GrantedApplicationImmunityTags` checks if the Source `ASC` (including tags from the Source ability's `AbilityTags` if there was one) has any of the specified tags. This is a way to provide immunity from all `GameplayEffects` from certain characters or sources based on their tags.
+<!--/en--> 
 `GrantedApplicationImmunityTags`检查源`ASC`（包括源能力的`技能标签`，如果有的话）是否有指定的标签。这是一种提供免疫的方法，可以基于它们的标签从特定角色或源中免疫所有`游戏效果`。
 
+<!--en--> 
 `Granted Application Immunity Query` checks the incoming `GameplayEffectSpec` if it matches any of the queries to block or allow its application.  
+<!--/en--> 
 `Granted Application Immunity Query`检查传入的`GameplayEffectSpec`是否与阻止或允许其应用的任何查询匹配。
 
+<!--en--> 
 The queries have helpful hover tooltips in the `GameplayEffect` Blueprint.
+<!--/en--> 
 在`游戏效果`蓝图中，查询上会带有悬停提示。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-spec"></a>
 #### 4.5.9 游戏效果实例 / Gameplay Effect Spec
+<!--en--> 
 The [`GameplayEffectSpec`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectSpec/index.html) (`GESpec`) can be thought of as the instantiations of `GameplayEffects`. They hold a reference to the `GameplayEffect` class that they represent, what level it was created at, and who created it. These can be freely created and modified at runtime before application unlike `GameplayEffects` which should be created by designers prior to runtime. When applying a `GameplayEffect`, a `GameplayEffectSpec` is created from the `GameplayEffect` and that is actually what is applied to the Target.  
+<!--/en--> 
 [`GameplayEffectSpec`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectSpec/index.html)（`GESpec`）可以被认为是`游戏效果`的实例。它持有对表示它们的`游戏效果`类的引用，以及它被创建时的等级，以及谁创建了它。与设计师预先创建的`游戏效果`不同，`GESpec`可以在运行时自由创建和修改。当应用`游戏效果`时，会从`游戏效果`创建一个`GESpec`，实际上应用到目标上的是它而非`游戏效果`。
 
+<!--en--> 
 `GameplayEffectSpecs` are created from `GameplayEffects` using `UAbilitySystemComponent::MakeOutgoingSpec()` which is `BlueprintCallable`. `GameplayEffectSpecs` do not have to be immediately applied. It is common to pass a `GameplayEffectSpec` to a projectile created from an ability that the projectile can apply to the target it hits later. When `GameplayEffectSpecs` are successfully applied, they return a new struct called `FActiveGameplayEffect`.  
+<!--/en--> 
 `GameplayEffectSpec`是由`UAbilitySystemComponent::MakeOutgoingSpec()`创建的，该函数可以从蓝图调用。`GameplayEffectSpec`可能不会立即应用。一个很常见的手段是将`GameplayEffectSpec`传递给技能创建的子弹，并在稍后将其应用于击中的目标。当`GameplayEffectSpec`成功应用时，它们会返回一个新的结构体，称为`FActiveGameplayEffect`。
 
+<!--en--> 
 Notable `GameplayEffectSpec` Contents:
 * The `GameplayEffect` class that this `GameplayEffect` was created from.
 * The level of this `GameplayEffectSpec`. Usually the same as the level of the ability that created the `GameplayEffectSpec` but can be different.
@@ -1139,6 +1216,7 @@ Notable `GameplayEffectSpec` Contents:
 * `DynamicGrantedTags` that the `GameplayEffectSpec` grants to the Target in addition to the `GameplayTags` that the `GameplayEffect` grants.
 * `DynamicAssetTags` that the `GameplayEffectSpec` has in addition to the `AssetTags` that the `GameplayEffect` has.
 * `SetByCaller` `TMaps`.  
+<!--/en--> 
 值得注意的`GameplayEffectSpec`内容：
 * 创建此`游戏效果`的`游戏效果`类。
 * 这个`GameplayEffectSpec`的等级。通常与创建`GameplayEffectSpec`的技能的级别相同，但可以不同。
@@ -1155,7 +1233,9 @@ Notable `GameplayEffectSpec` Contents:
 
 <a name="concepts-ge-spec-setbycaller"></a>
 ##### 4.5.9.1 SetByCaller
+<!--en--> 
 `SetByCallers` allow the `GameplayEffectSpec` to carry float values associated with a `GameplayTag` or `FName` around. They are stored in their respective `TMaps`: `TMap<FGameplayTag, float>` and `TMap<FName, float>` on the `GameplayEffectSpec`. These can be used as `Modifiers` on the `GameplayEffect` or as generic means of ferrying floats around. It is common to pass numerical data generated inside of an ability to [`GameplayEffectExecutionCalculations`](#concepts-ge-ec) or [`ModifierMagnitudeCalculations`](#concepts-ge-mmc) via `SetByCallers`.  
+<!--/en--> 
 
 `SetByCaller`允许`GameplayEffectSpec`携带与`GameplayTag`或`FName`相关的浮点值。它们存储在各自`GameplayEffectSpec`上的`TMaps`中：`TMap<FGameplayTag, float>`和`TMap<FName, float>`。它们可以被用作`游戏效果`上的`修改器`，或作为通用的传输浮点值的方式。一种常见的用法是在技能内部，通过`SetByCaller`将数值数据传递给[`GameplayEffectExecutionCalculation`](#concepts-ge-ec) 或 [`ModifierMagnitudeCalculation`](#concepts-ge-mmc)。
 
@@ -1164,15 +1244,21 @@ Notable `GameplayEffectSpec` Contents:
 | `Modifiers` / `修改器`      | Must be defined ahead of time in the `GameplayEffect` class. Can only use the `GameplayTag` version. If one is defined on the `GameplayEffect` class but the `GameplayEffectSpec` does not have the corresponding tag and float value pair, the game will have a runtime error on application of the `GameplayEffectSpec` and return 0. This is a potential problem for a `Divide` operation. See [`Modifiers`](#concepts-ge-mods).<br>必须在`游戏效果`类中提前定义。 只能使用`游戏标签`版本。 如果在`游戏效果`类中定义了一个`修改器`，但是`GameplayEffectSpec`没有相应的标签和浮点数值对，则游戏会在应用`GameplayEffectSpec`时产生一个运行时错误，然后返回0。对于`除法`操作来说，这是一个潜在的问题。 请参阅[`修改器`]（＃concepts-ge-mods）。 |
 | Elsewhere / 其他        | Does not need to be defined ahead of time anywhere. Reading a `SetByCaller` that does not exist on a `GameplayEffectSpec` can return a developer defined default value with optional warnings.   <br>无需在任何地方提前定义。 读取一个在`GameplayEffectSpec`上不存在的`SetByCaller`会返回开发者预定义的默认值，并触发可选的警告。                                                                                                                                                                                                                                   |
 
+<!--en--> 
 To assign `SetByCaller` values in Blueprint, use the Blueprint node for the version that you need (`GameplayTag` or `FName`):
+<!--/en--> 
 在蓝图中指定`SetByCaller`值时，请使用您需要的版本的蓝图节点（`GameplayTag`或`FName`）：
 
 ![Assigning SetByCaller](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/setbycaller.png)
 
+<!--en--> 
 To read a `SetByCaller` value in Blueprint, you will need to make custom nodes in your Blueprint Library.
+<!--/en--> 
 在蓝图中读取`SetByCaller`值时，您需要在您的蓝图库中创建自定义节点。
 
+<!--en--> 
 To assign `SetByCaller` values in C++, use the version of the function that you need (`GameplayTag` or `FName`):
+<!--/en--> 
 在C++中指定`SetByCaller`值时，请使用您需要的版本的函数（`GameplayTag`或`FName`）：
 
 ```c++
@@ -1182,7 +1268,9 @@ void FGameplayEffectSpec::SetSetByCallerMagnitude(FName DataName, float Magnitud
 void FGameplayEffectSpec::SetSetByCallerMagnitude(FGameplayTag DataTag, float Magnitude);
 ```
 
+<!--en--> 
 To read a `SetByCaller` value in C++, use the version of the function that you need (`GameplayTag` or `FName`):
+<!--/en--> 
 在C++中读取`SetByCaller`值时，请使用您需要的版本的函数（`GameplayTag`或`FName`）：
 
 ```c++
@@ -1192,18 +1280,23 @@ float GetSetByCallerMagnitude(FName DataName, bool WarnIfNotFound = true, float 
 float GetSetByCallerMagnitude(FGameplayTag DataTag, bool WarnIfNotFound = true, float DefaultIfNotFound = 0.f) const;
 ```
 
+<!--en--> 
 I recommend using the `GameplayTag` version over the `FName` version. This can prevent spelling errors in Blueprint.
+<!--/en--> 
 我建议使用`GameplayTag`版本而不是`FName`版本。这可以在蓝图中防止拼写错误。
 
 **[⬆ 回到顶部](#table-of-contents)**
 
 <a name="concepts-ge-context"></a>
 #### 4.5.10 游戏效果上下文 / Gameplay Effect Context
+<!--en--> 
 The [`GameplayEffectContext`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectContext/index.html) structure holds information about a `GameplayEffectSpec's` instigator and [`TargetData`](#concepts-targeting-data). This is also a good structure to subclass to pass arbitrary data around between places like [`ModifierMagnitudeCalculations`](#concepts-ge-mmc) / [`GameplayEffectExecutionCalculations`](#concepts-ge-ec), [`AttributeSets`](#concepts-as), and [`GameplayCues`](#concepts-gc).  
+<!--/en--> 
 
 [`GameplayEffectContext`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/FGameplayEffectContext/index.html)结构保存有关`GameplayEffectSpec`的发起者和[`TargetData`](#concepts-targeting-data)的信息。它也是一个很好的结构，可以将其子类化以在[`ModifierMagnitudeCalculation`](#concepts-ge-mmc) / [`GameplayEffectExecutionCalculation`](#concepts-ge-ec)、[`AttributeSet`](#concepts-as)和[`GameplayCue`](#concepts-gc)等地方传递任意数据。
 
 
+<!--en--> 
 To subclass the `GameplayEffectContext`:
 
 1. Subclass `FGameplayEffectContext`
@@ -1212,6 +1305,7 @@ To subclass the `GameplayEffectContext`:
 1. Override `FGameplayEffectContext::NetSerialize()` if your new data needs to be replicated
 1. Implement `TStructOpsTypeTraits` for your subclass, like the parent struct `FGameplayEffectContext` has
 1. Override `AllocGameplayEffectContext()` in your [`AbilitySystemGlobals`](#concepts-asg) class to return a new object of your subclass
+<!--/en--> 
 
 要将其子类化：
 1. 子类化`FGameplayEffectContext`
@@ -1221,7 +1315,9 @@ To subclass the `GameplayEffectContext`:
 1. 为您的子类实现`TStructOpsTypeTraits`，就像父结构`FGameplayEffectContext`所做的那样
 1. 在您的[`AbilitySystemGlobals`](#concepts-asg)类中重写`AllocGameplayEffectContext()`以返回新对象类型的实例
 
+<!--en--> 
 [GASShooter](https://github.com/tranek/GASShooter) uses a subclassed `GameplayEffectContext` to add `TargetData` which can be accessed in `GameplayCues`, specifically for the shotgun since it can hit more than one enemy.
+<!--/en--> 
 
 [GASShooter](https://github.com/tranek/GASShooter) 使用一个子类化的`GameplayEffectContext`添加`TargetData`，它可以在`GameplayCue`中访问。特别是对于霰弹枪很有用，因为它可以击中多个敌人。
 
@@ -1229,19 +1325,25 @@ To subclass the `GameplayEffectContext`:
 
 <a name="concepts-ge-mmc"></a>
 #### 4.5.11 修改器幅度计算
+<!--en--> 
 [`ModifierMagnitudeCalculations`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayModMagnitudeCalculation/index.html) (`ModMagCalc` or `MMC`) are powerful classes used as [`Modifiers`](#concepts-ge-mods) in `GameplayEffects`. They function similarly to [`GameplayEffectExecutionCalculations`](#concepts-ge-ec) but are less powerful and most importantly they can be [predicted](#concepts-p). Their sole purpose is to return a float value from `CalculateBaseMagnitude_Implementation()`. You can subclass and override this function in Blueprint and C++.
+<!--/en--> 
 
 <!--cn-->
 `ModifierMagnitudeCalculation` (`ModMagCalc` or `MMC`) 是强大的类，用于`游戏效果`中的[`修改器`](#concepts-ge-mods)。它们的功能类似于[`GameplayEffectExecutionCalculations`](#concepts-ge-ec)，但功能较弱，最重要的是它们可以[预测](#concepts-p)。它们的唯一目的是从`CalculateBaseMagnitude_Implementation()`返回一个浮点值。您可以在蓝图和C++中子类化和重写这个函数。
 <!--/cn-->
 
+<!--en--> 
 `MMCs` can be used in any duration of `GameplayEffects` - `Instant`, `Duration`, `Infinite`, or `Periodic`.
+<!--/en--> 
 
 <!--cn-->
 `MMC`可以在任何类型`游戏效果`起作用 - `立即`，`持续`，`无限`或`周期`。  
 <!--/cn-->
   
+<!--en--> 
 `MMCs'` strength lies in their capability to capture the value of any number of `Attributes` on the `Source` or the `Target` of `GameplayEffect` with full access to the `GameplayEffectSpec` to read `GameplayTags` and `SetByCallers`. `Attributes` can either be snapshotted or not. Snapshotted `Attributes` are captured when the `GameplayEffectSpec` is created whereas non snapshotted `Attributes` are captured when the `GameplayEffectSpec` is applied and automatically update when the `Attribute` changes for `Infinite` and `Duration` `GameplayEffects`. Capturing `Attributes` recalculates their `CurrentValue` from existing mods on the `ASC`. This recalculation will **not** run [`PreAttributeChange()`](#concepts-as-preattributechange) in the `AbilitySet` so any clamping must be done here again.
+<!--/en--> 
 
 <!--cn-->  
 `MMC`的强度依赖于它们捕获`游戏效果`在任何`属性`上的`源`或`目标`的值的能力，并且完全访问`游戏效果实例`以读取`游戏标签`和`SetByCaller`。`属性`可以快照或不快照。快照的`属性`是在`游戏效果实例`创建时被捕捉，而非快照的`属性`是在`游戏效果实例`应用时被捕捉，并且在`无限`和`持续``游戏效果`上，当`属性`改变时自动更新。捕捉`属性`会在现有的`ASC`上重新计算它们的`当前值`。这个重新计算将**不会**在`AbilitySet`中运行[`PreAttributeChange()`](#concepts-as-preattributechange)，所以如果任何限值必须在这里再做一次。
@@ -1254,13 +1356,17 @@ To subclass the `GameplayEffectContext`:
 | No       | Source           | Application                      | Yes                                                                              |
 | No       | Target           | Application                      | Yes                                                                              |
 
+<!--en--> 
 The resultant float from an `MMC` can further be modified in the `GameplayEffect's` `Modifier` by a coefficient and a pre and post coefficient addition.
+<!--/en--> 
 
 <!--cn-->
 `MMC`的结果可以进一步通过系数和预加系数和后加系数修改`游戏效果`的`修改器`。
 <!--/cn-->
 
+<!--en--> 
 An example `MMC` that captures the `Target's` mana `Attribute` reduces it from a poison effect where the amount reduced changes depending on how much mana the `Target` has and a tag that the `Target` might have:
+<!--/en--> 
 
 <!--cn-->
 以下是一个示例`MMC`，它捕捉`目标`的法力`属性`，造成一种法力流失的中毒效果，减少的量取决于`目标`的`法力`有多少，以及`目标`可能拥有的标签：
@@ -1319,7 +1425,9 @@ float UPAMMC_PoisonMana::CalculateBaseMagnitude_Implementation(const FGameplayEf
 }
 ```
 
+<!--en--> 
 If you don't add the `FGameplayEffectAttributeCaptureDefinition` to `RelevantAttributesToCapture` in the `MMC's` constructor and try to capture `Attributes`, you will get an error about a missing Spec while capturing. If you don't need to capture `Attributes`, then you don't have to add anything to `RelevantAttributesToCapture`.
+<!--/en--> 
 
 <!--cn-->
 如果尝试捕获`属性`之前，你没有将`FGameplayEffectAttributeCaptureDefinition`添加到`MMC`的构造函数中的`RelevantAttributesToCapture`，会得到一个关于捕获实例的错误。如果你不需要捕获`属性`，那么你就不需要添加任何东西到`RelevantAttributesToCapture`。
@@ -1329,19 +1437,25 @@ If you don't add the `FGameplayEffectAttributeCaptureDefinition` to `RelevantAtt
 
 <a name="concepts-ge-ec"></a>
 #### 4.5.12 Gameplay Effect Execution Calculation
+<!--en--> 
 [`GameplayEffectExecutionCalculations`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectExecutionCalculat-/index.html) (`ExecutionCalculation`, `Execution` (you will often see this term in the plugin's source code), or `ExecCalc`) are the most powerful way for `GameplayEffects` to make changes to an `ASC`. Like [`ModifierMagnitudeCalculations`](#concepts-ge-mmc), these can capture `Attributes` and optionally snapshot them. Unlike `MMCs`, these can change more than one `Attribute` and essentially do anything else that the programmer wants. The downside to this power and flexibility is that they can not be [predicted](#concepts-p) and they must be implemented in C++.
+<!--/en--> 
 
 <!--cn-->
 [`GameplayEffectExecutionCalculation`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectExecutionCalculat-/index.html)(`ExecutionCalculation`, `Execution`（您通常会在插件的源代码中看到此术语）, 或者 `ExecCalc`)是`游戏效果`修改`ASC`最强大的方式。像[`ModifierMagnitudeCalculation`](#concepts-ge-mmc)一样，这些可以捕捉`属性`并可以选择对它们快照。与`MMC`不同的是，它可以改变不止一个`属性`，本质上来说可以做任何程序员想要的事情。这种灵活而强大的代价是它们不能被[预测](#concepts-p)，并且必须在C++中实现。
 <!--/cn-->
 
+<!--en--> 
 `ExecutionCalculations` can only be used with `Instant` and `Periodic` `GameplayEffects`. Anything with the word 'Execute' in it typically refers to these two types of `GameplayEffects`.
+<!--/en--> 
 
 <!--cn-->
 `ExecutionCalculation`只能与`即时`和`周期`型 `游戏效果`一起使用。任何包含“Execute”一词的通常指的是这两种类型的`游戏效果`。
 <!--/cn-->
 
+<!--en--> 
 Snapshotting captures the `Attribute` when the `GameplayEffectSpec` is created whereas not snapshotting captures the `Attribute` when the `GameplayEffectSpec` is applied. Capturing `Attributes` recalculates their `CurrentValue` from existing mods on the `ASC`. This recalculation will **not** run [`PreAttributeChange()`](#concepts-as-preattributechange) in the `AbilitySet` so any clamping must be done here again.
+<!--/en--> 
 
 <!--cn-->
 `GameplayEffectSpec`创建时快照会捕获`属性`，而应用时不会捕获。捕获`属性`会根据现有的`ASC`重新计算它们的`当前值`。这个重新计算**不会**在`AbilitySet`中触发[`PreAttributeChange()`](#concepts-as-preattributechange)，所以任何限制必须在这里再次完成。
@@ -1354,19 +1468,25 @@ Snapshotting captures the `Attribute` when the `GameplayEffectSpec` is created w
 | No       | Source           | Application                      |
 | No       | Target           | Application                      |
 
+<!--en--> 
 To set up `Attribute` capture, we follow a pattern set by Epic's ActionRPG Sample Project by defining a struct holding and defining how we capture the `Attributes` and creating one copy of it in the struct's constructor. You will have a struct like this for every `ExecCalc`. **Note:** Each struct needs a unique name as they share the same namespace. Using the same name for the structs will cause incorrect behavior in capturing your `Attributes` (mostly capturing the values of the wrong `Attributes`).
+<!--/en--> 
 
 <!--cn-->
 为了捕获`属性`，我们遵循 Epic 的 ActionRPG 示例项目的设置模式，定义一个结构体持有并定义如何捕获`属性`，并在这个结构的构造函数中创建一个副本。对于每个`ExecCalc`，设置一个这样的结构体，**注意：**每个结构体需要一个唯一的名称，因为它们共享相同的命名空间。结构体重名将导致捕获`属性`过程中发生行为错误（主要是捕获了错误的`属性`值）。
 <!--/cn-->
 
+<!--en--> 
 For `Local Predicted`, `Server Only`, and `Server Initiated` [`GameplayAbilities`](#concepts-ga), the `ExecCalc` only calls on the Server.
+<!--/en--> 
 
 <!--cn-->
 对于`Local Predicted`、`Server Only`和`Server Initiated` 的[`技能`](#concepts-ga)，`ExecCalc`只会在服务器上调用。
 <!--/cn-->
 
+<!--en--> 
 Calculating damage received based on a complex formula reading from many attributes on the `Source` and the `Target` is the most common example of an `ExecCalc`. The included Sample Project has a simple `ExecCalc` for calculating damage that reads the value of damage from the `GameplayEffectSpec's` [`SetByCaller`](#concepts-ge-spec-setbycaller) and then mitigates that value based on the armor `Attribute` captured from the `Target`. See `GDDamageExecCalculation.cpp/.h`.
+<!--/en--> 
 
 <!--cn-->
 `ExecCalc`最常见的的例子是，从`源`和`目标`上读取许多`属性`，以复杂公式计算受到的伤害。包含的示例项目中有一个简单的`ExecCalc`，用于计算从`GameplayEffectSpec`的[`SetByCaller`](#concepts-ge-spec-setbycaller)读取伤害值，然后根据从`目标`捕获的`属性`减去该值。请参阅`GDDamageExecCalculation.cpp/.h`。
@@ -1376,7 +1496,9 @@ Calculating damage received based on a complex formula reading from many attribu
 
 <a name="concepts-ge-ec-senddata"></a>
 ##### 4.5.12.1 向`ExecutionCalculation`发送数据
+<!--en--> 
 There are a few ways to send data to an `ExecutionCalculation` in addition to capturing `Attributes`.
+<!--/en--> 
 
 <!--cn-->
 除了捕获`属性`之外，还有几种方法可以向`ExecutionCalculation`发送数据。
@@ -1396,22 +1518,33 @@ float Damage = FMath::Max<float>(Spec.GetSetByCallerMagnitude(FGameplayTag::Requ
 ```
 
 <a name="concepts-ge-ec-senddata-backingdataattribute"></a>
+<!--en--> 
 ###### 4.5.12.1.2 Backing Data Attribute Calculation Modifier
+<!--/en--> 
 ###### 4.5.12.1.2 后备数据属性计算修改器
+<!--en--> 
 If you want to hardcode values to a `GameplayEffect`, you can pass them in using a `CalculationModifier` that uses one of the captured `Attributes` as the backing data.
+<!--/en--> 
 
 <!--cn-->
 如果你想让一个`游戏效果`使用硬编码值，你可以使用一个以捕获的`属性`作为后备数据的`CalculationModifier`。
 <!--/cn-->
 
+<!--en--> 
 In this screenshot example, we're adding 50 to the captured Damage `Attribute`. You could also set this to `Override` to just take in only the hardcoded value.
+<!--/en--> 
 <!--cn-->
 在下面的截图例子中，我们给捕获的Damage`属性`加50。你也可以设置这个为`Override`，只接受硬编码值。
 <!--/cn-->
 
 ![Backing Data Attribute Calculation Modifier](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/calculationmodifierbackingdataattribute.png)
 
+<!--en--> 
 The `ExecutionCalculation` reads this value in when it captures the `Attribute`.
+<!--/en--> 
+<!--cn-->
+`ExecutionCalculation`在捕获`属性`时读取这个值。
+<!--/cn-->
 
 ```c++
 float Damage = 0.0f;
@@ -1421,13 +1554,25 @@ ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().Damag
 
 <a name="concepts-ge-ec-senddata-backingdatatempvariable"></a>
 ###### 4.5.12.1.3 Backing Data Temporary Variable Calculation Modifier
+<!--en-->
 If you want to hardcode values to a `GameplayEffect`, you can pass them in using a `CalculationModifier` that uses a `Temporary Variable` or `Transient Aggregator` as it's called in C++. The `Temporary Variable` is associated with a `GameplayTag`.
+<!--/en-->  
 
+<!--cn-->
+如果你想要硬编码值给一个`游戏效果`，你可以使用一个`CalculationModifier`，它在C++中被调用时，使用一个`Temporary Variable`或者`Transient Aggregator`作为它的参数。`Temporary Variable`与一个`GameplayTag`相关联。
+<!--/cn-->
+
+<!--en-->
 In this screenshot example, we're adding 50 to a `Temporary Variable` using the `Data.Damage` `GameplayTag`.
+<!--/en-->
+<!--cn-->
+在下面的截图例子中，我们使用`Data.Damage` `GameplayTag`给一个`Temporary Variable`加上50。
+<!--/cn-->
 
 ![Backing Data Temporary Variable Calculation Modifier](https://github.com/flyingSnow-hu/GASDocumentationCN/raw/master/Images/calculationmodifierbackingdatatempvariable.png)
-
+<!--en-->
 Add backing `Temporary Variables` to your `ExecutionCalculation`'s constructor:
+<!--/en-->
 <!--cn-->
 在`ExecutionCalculation`的构造函数里添加`Temporary Variables`：
 <!--/cn-->
@@ -1448,12 +1593,18 @@ ExecutionParams.AttemptCalculateTransientAggregatorMagnitude(FGameplayTag::Reque
 
 <a name="concepts-ge-ec-senddata-effectcontext"></a>
 ###### 4.5.12.1.4 游戏效果上下文 / Gameplay Effect Context
+<!--en-->
 You can send data to the `ExecutionCalculation` via a custom [`GameplayEffectContext` on the `GameplayEffectSpec`](#concepts-ge-context).
+<!--/en-->
+
 <!--cn-->
 可以通过[`GameplayEffectSpec`上的自定义`GameplayEffectContext`](#concepts-ge-context)发送数据到`ExecutionCalculation`。
 <!--/cn-->
 
+<!--en-->
 In the `ExecutionCalculation` you can access the `EffectContext` from the `FGameplayEffectCustomExecutionParameters`.
+<!--en-->
+
 <!--cn-->
 在`ExecutionCalculation`中，你可以从`FGameplayEffectCustomExecutionParameters`访问`EffectContext`。
 <!--/cn-->
@@ -1463,7 +1614,10 @@ const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
 FGSGameplayEffectContext* ContextHandle = static_cast<FGSGameplayEffectContext*>(Spec.GetContext().Get());
 ```
 
+<!--en-->
 If you need change something on the `GameplayEffectSpec` or the `EffectContext`:
+<!--/en-->
+
 <!--cn-->
 如果需要修改`GameplayEffectSpec`或`EffectContext`：
 <!--/cn-->
@@ -1473,7 +1627,9 @@ FGameplayEffectSpec* MutableSpec = ExecutionParams.GetOwningSpecForPreExecuteMod
 FGSGameplayEffectContext* ContextHandle = static_cast<FGSGameplayEffectContext*>(MutableSpec->GetContext().Get());
 ```
 
+<!--en-->
 Use caution if modifying the `GameplayEffectSpec` in the `ExecutionCalculation`. See the comment for `GetOwningSpecForPreExecuteMod()`.
+<!--/en-->
 
 <!--cn-->
 在`ExecutionCalculation`中修改`GameplayEffectSpec`时要小心。请参阅`GetOwningSpecForPreExecuteMod()`的注释。
@@ -1489,15 +1645,19 @@ FGameplayEffectSpec* GetOwningSpecForPreExecuteMod() const;
 
 <a name="concepts-ge-car"></a>
 #### 4.5.13 自定义应用要求
+<!--en-->
 [`CustomApplicationRequirement`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectCustomApplication-/index.html) (`CAR`) classes give the designers advanced control over whether a `GameplayEffect` can be applied versus the simple `GameplayTag` checks on the `GameplayEffect`. These can be implemented in Blueprint by overriding `CanApplyGameplayEffect()` and in C++ by overriding `CanApplyGameplayEffect_Implementation()`.
+<!--en-->
 
 <!--cn-->
 [`CustomApplicationRequirement`](https://docs.unrealengine.com/en-US/API/Plugins/GameplayAbilities/UGameplayEffectCustomApplication-/index.html) (`CAR`) 类允许设计师对 `GameplayEffect` 能否被应用进行高级控制。这些可以在蓝图中通过重写 `CanApplyGameplayEffect()` 实现，也可以在 C++ 中通过重写 `CanApplyGameplayEffect_Implementation()` 实现。
 <!--/cn-->
 
+<!--en-->
 Examples of when to use `CARs`:
 * `Target` needs to have a certain amount of an `Attribute`
 * `Target` needs to have a certain number of stacks of a `GameplayEffect`
+<!--/en-->
 
 <!--cn-->
 使用 `CAR` 的例子：
@@ -1505,7 +1665,9 @@ Examples of when to use `CARs`:
 * `目标` 需要某`游戏效果`的堆叠数达到一定值
 <!--/cn-->
 
+<!--en-->
 `CARs` can also do more advanced things like checking if an instance of this `GameplayEffect` is already on the `Target` and [changing the duration](#concepts-ge-duration) of the existing instance instead of applying a new instance (return false for `CanApplyGameplayEffect()`).
+<!--/en-->
 <!--cn-->
 `CAR`也能做更高级的事情，比如检查`目标`上是否已经存在该`游戏效果`的实例，如果存在则修改该实例的持续时间而不应用新的实例（在`CanApplyGameplayEffect()`中返回false）。
 <!--/cn-->
@@ -1514,22 +1676,32 @@ Examples of when to use `CARs`:
 
 <a name="concepts-ge-cost"></a>
 #### 4.5.14 消耗性技能效果 / Cost Gameplay Effect
+<!--en-->
 [`GameplayAbilities`](#concepts-ga) have an optional `GameplayEffect` specifically designed to use as the cost of the ability. Costs are how much of an `Attribute` an `ASC` needs to have to be able to activate the `GameplayAbility`. If a `GA` cannot afford the `Cost GE`, then they will not be able to activate. This `Cost GE` should be an `Instant` `GameplayEffect` with one or more `Modifiers` that subtract from `Attributes`. By default, `Cost GEs` are meant to be predicted and it is recommended to maintain that capability meaning do not use `ExecutionCalculations`. `MMCs` are perfectly acceptable and encouraged for complex cost calculations.
+<!--/en-->
+
 <!--cn-->
 [`游戏技能`](#concepts-ga)有可选的`游戏效果`，专门用于技能的消耗。消耗的含义是`ASC`需要`属性`值达到多少才能激活`游戏技能`。如果`GA`无法负担`消耗性GE`的消耗，那么就无法激活。这个`消耗性GE`应该是一个`即时`的`游戏效果`，带有一个或多个`修改器`，用来从`属性`中减掉值。默认情况下，`消耗性GE`应该可以被预测，建议保持这种能力，这也就意味着尽量不要使用`ExecutionCalculation`。`MMC`完美符合要求，所以建议将其用于计算较复杂的消耗。
 <!--/cn-->
 
+<!--en-->
 When starting out, you will most likely have one unique `Cost GE` per `GA` that has a cost. A more advanced technique is to reuse one `Cost GE` for multiple `GAs` and just modify the `GameplayEffectSpec` created from the `Cost GE` with the `GA`-specific data (the cost value is defined on the `GA`). **This only works for `Instanced` abilities.**
+<!--/en-->
 <!--cn-->
 刚开始的时候，你可能会为每个`技能`创建一个唯一的`消耗性GE`。更高级的技巧是，复用一个`消耗性GE`来为多个`技能`服务，并使用`技能`特定的数据来修改`消耗性GE`创建的`GameplayEffectSpec`（消耗值是在`技能`上定义的）。**这个方法只适用于`实例化`的技能。**
 <!--/cn-->
 
+<!--en-->
 Two techniques for reusing the `Cost GE`:
+<!--/en-->
+
 <!--cn-->
 复用`消耗性GE`的两种方法：
 <!--/cn-->
 
+<!--en-->
 1. **Use an `MMC`.** This is the easiest method. Create an [`MMC`](#concepts-ge-mmc) that reads the cost value from the `GameplayAbility` instance which you can get from the `GameplayEffectSpec`.
+<!--/en-->
 
 <!--cn-->
 1. **使用`MMC`。**这是最简单的方法。创建一个[`MMC`](#concepts-ge-mmc)，从`GameplayEffectSpec`中获取`游戏技能`的实例，再从技能实例获取消耗值。
@@ -1549,7 +1721,10 @@ float UPGMMC_HeroAbilityCost::CalculateBaseMagnitude_Implementation(const FGamep
 }
 ```
 
+<!--en-->
 In this example the cost value is an `FScalableFloat` on the `GameplayAbility` child class that I added to it.
+<!--/en-->
+
 <!--cn-->
 在这个例子中，消耗值是一个`FScalableFloat`，它被添加到`GameplayAbility`的子类中。
 <!--/cn-->
